@@ -11,4 +11,4 @@ To run this app, add a file app/src/main/res/values/passwords.xml with the follo
     <string name="acra_uri" translatable="false"><!-- YOUR_ACRA_URI --></string>
 </resources>
 ```
-Then rename app/build.gradle.example to app/build.gradle and fill in your own passwords or remove the whole block "signingConfigs". Ready to go!
+Then rename `app/build.gradle.example` to `app/build.gradle` and fill in your own passwords or remove the whole block "signingConfigs". Ready to go!
