@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- DEFAULT: BLUE -->
+
+    <color name="colorPrimary">#0288d1</color>
+    <color name="colorPrimaryDark">#005b9f</color>
+    <color name="colorAccent">#ed7425</color>
+    <color name="heaven_blue">#809fff</color>
+    <color name="temperature_label">#e65100</color>
+
+
+    <!-- ORANGE -->
+
+    <color name="colorPrimaryOrange">#ff8533</color>
+    <!-- ff8533 -->
+    <color name="colorPrimaryDarkOrange">#ff6600</color>
+    <!-- ff6600 -->
+    <color name="colorAccentOrange">#01579b</color>
+    <!-- 01579b -->
+    <color name="heaven_blueOrange">#809fff</color>
+    <color name="temperature_labelOrange">#e65100</color>
+</resources>

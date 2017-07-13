@@ -1,0 +1,20 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header
+        android:fragment="de.joesch_it.chillweather.ui.SettingsActivity$ColorsPreferenceFragment"
+        android:icon="@drawable/ic_color"
+        android:title="@string/pref_header_general"/>
+
+    <header
+        android:fragment="de.joesch_it.chillweather.ui.SettingsActivity$AutoRefreshPreferenceFragment"
+        android:icon="@drawable/ic_refresh"
+        android:title="@string/pref_header_data_sync"/>
+
+    <header
+        android:fragment="de.joesch_it.chillweather.ui.SettingsActivity$WidgetPreferenceFragment"
+        android:icon="@drawable/ic_widgets"
+        android:title="@string/pref_header_widgets"/>
+
+</preference-headers>

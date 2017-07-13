@@ -1,0 +1,24 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pref_app_theme_titles"
+        android:entryValues="@array/pref_app_theme_values"
+        android:key="app_theme"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_app_theme"/>
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="colored_icons_switch"
+        android:summary="@string/pref_description_colored_icons"
+        android:title="@string/pref_title_colored_icons"/>
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="temperature_colored_background_switch"
+        android:summary="@string/pref_description_temperature_colored_background"
+        android:title="@string/pref_title_temperature_colored_background"/>
+
+</PreferenceScreen>

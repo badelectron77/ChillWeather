@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chill Wetter</string>
+    <string name="dialog_error_message">Es gab einen Verbindungsfehler. Bitte nochmals versuchen!</string>
+    <string name="humidity">LUFTFEUCHTE</string>
+    <string name="network_is_unavailable">Kein Netz verfügbar!</string>
+    <string name="rain_snow">REGEN/SCHNEE?</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="grant">Erlauben</string>
+    <string name="need_multiple_permissions">Berechtigung erforderlich</string>
+    <string name="this_app_needs_location_permission">Diese App benötigt die Erlaubnis, den Standort zu ermitteln</string>
+    <string name="hourly">STÜNDLICH</string>
+    <string name="there_is_no_data_to_display">Keine Daten vorhanden.</string>
+    <string name="update_weather_data">Wetter aktualisieren</string>
+    <string name="today">Heute</string>
+    <string name="tomorrow">Morgen</string>
+    <string name="o_clock">Uhr</string>
+    <string name="pref_header_general">Farben</string>
+    <string name="pref_header_about">Über</string>
+    <string name="title_activity_about">Über Chill Wetter</string>
+    <string name="this_app_was_built_by"><![CDATA[
+        Chill Wetter wurde von Stefan Jösch geschrieben. Ich freue mich über Anregungen,
+        Kritik und Kommentare: <a href="mailto:stefan.joesch@joesch-it.de">E-Mail</a>. Der Quellcode
+        befindet sich auf <a href="https://github.com/badelectron77/ChillWeather">GitHub</a>.
+    ]]></string>
+    <string name="icons_list"><![CDATA[
+    Wetter Icons erstellt durch <a href="http://www.freepik.com/">Freepik</a> von
+    <a href="http://www.flaticon.com/">Flaticon</a>.
+    App-Icon erstellt durch <a href="http://www.flaticon.com/authors/maxim-basinski/">Maxim Basinski</a>
+    von <a href="http://www.flaticon.com/">Flaticon</a>.
+    ]]></string>
+    <string name="open_with">Öffnen mit</string>
+    <string name="version">Version</string>
+    <string name="used_libs">Verwendete Bibliotheken:</string>
+    <string name="used_icons">Verwendete Icons:</string>
+
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="ok">OK</string>
+    <string name="pref_header_data_sync">Aktualisierung</string>
+    <string name="pref_header_notifications">Benachrichtigungen</string>
+    <string name="pref_title_colored_icons">Bunte Icons</string>
+    <string name="pref_description_colored_icons">Bunte Wetter-Icons statt einfarbiger Icons</string>
+
+    <string name="pref_title_app_theme">App Look</string>
+    <string-array name="pref_app_theme_titles">
+        <item>Blau</item>
+        <item>Orange</item>
+    </string-array>
+    <string-array name="pref_app_theme_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string name="pref_title_autorefresh_frequency">Aktualisiere das Wetter…</string>
+    <string-array name="pref_autorefresh_frequency_titles">
+        <item>jede Stunde</item>
+        <item>alle 3 Stunden</item>
+        <item>alle 6 Stunden</item>
+        <item>alle 12 Stunden</item>
+        <item>alle 24 Stunden</item>
+    </string-array>
+    <string-array name="pref_autorefresh_frequency_values">
+        <item>1</item>
+        <item>3</item>
+        <item>6</item>
+        <item>12</item>
+        <item>24</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value"/>
+
+    <string name="pref_title_widget_transparency">Widget Transparenz</string>
+    <string-array name="pref_widget_transparency_titles">
+        <item>0 &#65285;</item>
+        <item>10 &#65285;</item>
+        <item>20 &#65285;</item>
+        <item>30 &#65285;</item>
+        <item>40 &#65285;</item>
+        <item>50 &#65285;</item>
+        <item>60 &#65285;</item>
+        <item>70 &#65285;</item>
+        <item>80 &#65285;</item>
+        <item>90 &#65285;</item>
+        <item>100 &#65285;</item>
+    </string-array>
+    <string-array name="pref_widget_transparency_values">
+        <item>0</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+        <item>60</item>
+        <item>70</item>
+        <item>80</item>
+        <item>90</item>
+        <item>100</item>
+    </string-array>
+
+    <string name="pref_description_temperature_colored_background">Temperaturabhängige Hintergrundfarben für alle Ansichten</string>
+    <string name="pref_title_temperature_colored_background">Temperaturabh. Hintergrundfarben</string>
+    <string name="pref_title_autorefresh_weather_switch">Automatisch Wetter aktualisieren</string>
+    <string name="pref_description_autorefresh_weather_switch">Automatische Aktualisierung der Wetterdaten in bestimmten Intervallen</string>
+    <string name="used_weather_service">Verwendeter Wetterservice:</string>
+    <string name="no_location_available">kein Ort möglich</string>
+    <string name="searching">Suche…</string>
+    <string name="updated">Akt.</string>
+    <string name="loading">Lade…</string>
+    <string name="pref_header_widgets">Widget</string>
+    <string name="rate_this_app">App bewerten</string>
+
+</resources>

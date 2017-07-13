@@ -1,0 +1,78 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'ExampleReleaseKey'
+            keyPassword 'XXXXXXXXXX'
+            storeFile file('C:/Path/to/release.keystore.jks')
+            storePassword 'XXXXXXXXXX'
+        }
+    }
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
+    def versionPropsFile = file('version.properties')
+    if (versionPropsFile.canRead()) {
+
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        // read versionCode and increase by 1
+        def verCode = versionProps['VERSION_CODE'].toInteger() + 1
+        versionProps['VERSION_CODE'] = verCode.toString()
+
+        // store
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        // change here and in version.properties on major updates
+        def verName = "1.0." + verCode.toString()
+
+        defaultConfig {
+            applicationId "de.joesch_it.chillweather"
+            minSdkVersion 16
+            targetSdkVersion 25
+            versionCode verCode  // 34
+            versionName verName  // 1.0.34
+            testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        }
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.squareup.okhttp3:okhttp:3.8.0'
+    compile 'com.jakewharton:butterknife:8.6.0'
+    compile 'com.google.android.gms:play-services-location:11.0.2'
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.faendir:acra:4.9.3'
+    compile 'me.zhanghai.android.materialprogressbar:library:1.4.1'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:support-vector-drawable:25.3.1'
+    compile 'com.google.firebase:firebase-core:10.0.1'
+    testCompile 'junit:junit:4.12'
+	// To avoid errors, use the same Firebase SDK version across your app.
+    compile 'com.google.firebase:firebase-appindexing:11.0.2'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
+}
+
+
+apply plugin: 'com.google.gms.google-services'
