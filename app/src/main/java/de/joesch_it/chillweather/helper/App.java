@@ -2,14 +2,8 @@ package de.joesch_it.chillweather.helper;
 
 import android.Manifest;
 import android.app.Application;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.util.Log;
-import android.widget.Toast;
 
 import org.acra.ACRA;
 import org.acra.config.ACRAConfiguration;
@@ -19,12 +13,13 @@ import org.acra.config.ConfigurationBuilder;
 import java.lang.ref.WeakReference;
 
 import de.joesch_it.chillweather.R;
-import de.joesch_it.chillweather.ui.ChillWidgetProvider;
+
+import static de.joesch_it.chillweather.helper.Helper.updateWidget;
 
 
 public class App extends Application {
 
-    public static final String BUILD = "13.07.2017 11:24";
+    public static final String BUILD = "17.07.2017 12:02";
     public static final String STORE_URL = "https://play.google.com/store/apps/details?id=de.joesch_it.chillweather";
     public static final String TAG = " ### " + App.class.getSimpleName() + " ###";
     public static final String POSITION_TOMORROW = "POSITION_TOMORROW";
@@ -89,21 +84,6 @@ public class App extends Application {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         //Log.v(TAG, "onConfigurationChanged()");
-        updateWidget(this, true);
-    }
-
-    public static void updateWidget(Context context, boolean orientationChanged) {
-
-        if(orientationChanged) {
-            SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, true);
-            editor.apply();
-        }
-
-        Intent intent = new Intent(context, ChillWidgetProvider.class);
-        intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
-        int ids[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, ChillWidgetProvider.class));
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        context.sendBroadcast(intent);
+        updateWidget(this, true); // design & AlarmManager refresh
     }
 }

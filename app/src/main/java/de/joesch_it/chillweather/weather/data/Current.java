@@ -6,10 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import de.joesch_it.chillweather.R;
-import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
-import de.joesch_it.chillweather.weather.Forecast;
 
 public class Current {
 
@@ -60,8 +57,8 @@ public class Current {
         mIcon = icon;
     }
 
-    public int getIconId() {
-        return Forecast.getIconId(mIcon);
+    public String getIconString() {
+        return mIcon;
     }
 
     public int getTemperature() {

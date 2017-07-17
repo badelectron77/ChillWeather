@@ -1,7 +1,7 @@
 package de.joesch_it.chillweather.weather.data;
 
 
-import de.joesch_it.chillweather.weather.Forecast;
+import de.joesch_it.chillweather.helper.Helper;
 
 public class Day {
 
@@ -55,7 +55,7 @@ public class Day {
     }
 
     public int getIconId() {
-        return Forecast.getIconId(mIcon);
+        return Helper.getIconId(mIcon);
     }
 
     public String getUnit() {

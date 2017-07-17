@@ -1,7 +1,10 @@
 package de.joesch_it.chillweather.helper;
 
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -20,8 +23,42 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import de.joesch_it.chillweather.R;
+import de.joesch_it.chillweather.ui.ChillWidgetProvider;
+
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
 
 public final class Helper {
+
+    public static String getFormattedLocationName(String locationName) {
+
+        String[] parts = locationName.split(",");
+        locationName = parts.length > 2 ? parts[1] : parts[0];
+
+        // remove starting numbers (http://regexr.com/)
+        locationName = locationName.replaceAll("^\\d+", "");
+
+        // remove words containing numbers
+        locationName = locationName.replaceAll("\\w*\\d\\w*", "");
+
+        return locationName.trim();
+    }
+
+    public static void updateWidget(Context context, boolean keepValues) {
+
+        SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+
+        if(keepValues) {
+            SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, true);
+            editor.apply();
+        }
+
+        Intent intent = new Intent(context, ChillWidgetProvider.class);
+        intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
+        int ids[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, ChillWidgetProvider.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        context.sendBroadcast(intent);
+    }
 
     public static boolean isNetworkAvailable(Context context) {
 
@@ -233,6 +270,58 @@ public final class Helper {
                 break;
         }
         return resDrawable;
+    }
+
+    public static int getIconId(String iconString) {
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+
+        String iconSetNumber = "01";
+
+        if(!sharedPrefs.getBoolean("colored_icons_switch", true)) {
+            iconSetNumber = "00";
+        }
+
+        int iconId = getResId("clear_day_" + iconSetNumber);
+
+        switch (iconString) {
+            case "clear-day":
+                iconId = getResId("clear_day_" + iconSetNumber);
+                break;
+            case "clear-night":
+                iconId = getResId("clear_night_" + iconSetNumber);
+                break;
+            case "rain":
+                iconId = getResId("rain_" + iconSetNumber);
+                break;
+            case "snow":
+                iconId = getResId("snow_" + iconSetNumber);
+                break;
+            case "sleet":
+                iconId = getResId("sleet_" + iconSetNumber);
+                break;
+            case "wind":
+                iconId = getResId("wind_" + iconSetNumber);
+                break;
+            case "fog":
+                iconId = getResId("fog_" + iconSetNumber);
+                break;
+            case "cloudy":
+                iconId = getResId("cloudy_" + iconSetNumber);
+                break;
+            case "partly-cloudy-day":
+                iconId = getResId("partly_cloudy_" + iconSetNumber);
+                break;
+            case "partly-cloudy-night":
+                iconId = getResId("cloudy_night_" + iconSetNumber);
+                break;
+        }
+        return iconId;
+    }
+
+    private static int getResId(String pString){
+        Context context = App.getContext();
+        return context.getResources().getIdentifier(pString, "drawable", context.getPackageName());
     }
 
     public static boolean isTablet() {

@@ -26,7 +26,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -570,30 +569,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mLastLocationLatitude = mCurrentLocation.getLatitude();
         mLastLocationLongitude = mCurrentLocation.getLongitude();
 
-        // Köln
-        //mLastLocationLatitude = 50.937101;
-        //mLastLocationLongitude = 6.958117;
-
-        // Weiler bei Monzingen (test with spaces in city name)
-        //mLastLocationLatitude = 49.8278;
-        //mLastLocationLongitude = 7.53834;
-
-        // Anchorage
-        //mLastLocationLatitude = 61.199972;
-        //mLastLocationLongitude = -149.898872;
-
-        // Southern pacific, in the middle of nowhere
-        //mLastLocationLatitude = -65.487125;
-        //mLastLocationLongitude = -152.912444;
-
-        // Forsinard, Scotland
-        //mLastLocationLatitude = 58.358318;
-        //mLastLocationLongitude = -3.896534;
-
-        // Siberia
-        //mLastLocationLatitude = 76.217848;
-        //mLastLocationLongitude = 110.347490;
-
         if (mRefresh) {
             mRefresh = false;
             getForecast();
@@ -624,6 +599,37 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 + "?latlng=" + mLastLocationLatitude + "," + mLastLocationLongitude
                 + "&key=" + GOOGLE_GEOCODING_API_KEY;
 
+        // Köln
+        //mLastLocationLatitude = 50.937101;
+        //mLastLocationLongitude = 6.958117;
+
+        // Weiler bei Monzingen (test with spaces in city name)
+        //mLastLocationLatitude = 49.8278
+        //mLastLocationLongitude = 7.53834
+
+        // Anchorage
+        //mLastLocationLatitude = 61.199972;
+        //mLastLocationLongitude = -149.898872;
+
+        // Southern pacific, in the middle of nowhere
+        //mLastLocationLatitude = -65.487125;
+        //mLastLocationLongitude = -152.912444;
+
+        // Forsinard, Scotland
+        //mLastLocationLatitude = 58.358318;
+        //mLastLocationLongitude = -3.896534;
+
+        // Siberia
+        //mLastLocationLatitude = 76.217848;
+        //mLastLocationLongitude = 110.347490;
+
+        // english Address with words containing numbers
+        // 53.898833  -2.000750
+
+        /*final String geocodingUrl = "https://maps.googleapis.com/maps/api/geocode/json"
+                + "?latlng=" + 49.8278 + "," + 7.53834
+                + "&key=" + GOOGLE_GEOCODING_API_KEY;*/
+
         //Log.v(TAG, geocodingUrl);
 
         if (Helper.isNetworkAvailable(this)) {
@@ -650,10 +656,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                             if (results.length() > 1) {
                                 JSONObject locationObj = results.getJSONObject(0);
                                 String tmpLocationName = locationObj.getString("formatted_address");
-                                String[] parts = tmpLocationName.split(",");
-                                tmpLocationName = parts.length > 2 ? parts[1] : parts[0];
-                                tmpLocationName = tmpLocationName.replaceAll("^[0-9 ]+", "");
-                                mLocationName = tmpLocationName;
+                                mLocationName = Helper.getFormattedLocationName(tmpLocationName);
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -843,7 +846,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mPrecipValue.setText(String.valueOf(current.getPrecipChance()) + " %");
         mHumidityValue.setText(String.valueOf(current.getHumidity()) + " %");
         mSummaryLabel.setText(String.valueOf(current.getSummary()));
-        Drawable drawable = ContextCompat.getDrawable(this, current.getIconId());
+        Drawable drawable = ContextCompat.getDrawable(this, Helper.getIconId(current.getIconString()));
         mIconImageView.setImageDrawable(drawable);
 
         if (!mDayList.isEmpty()) {
