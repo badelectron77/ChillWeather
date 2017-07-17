@@ -48,7 +48,7 @@ public final class Helper {
 
         SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
 
-        if(keepValues) {
+        if (keepValues) {
             SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, true);
             editor.apply();
         }
@@ -222,14 +222,29 @@ public final class Helper {
         return formatterWeekday.format(weekday);
     }
 
+    public static String getWeekdayDate(long time, String timezone) {
+
+        String format = "MMMM d";
+
+        if (getCountryCode().equals("de")) {
+            format = "d. MMMM";
+        }
+
+        SimpleDateFormat formatterWeekday = new SimpleDateFormat(format, Locale.getDefault());
+        formatterWeekday.setTimeZone(TimeZone.getTimeZone(timezone));
+        Date weekday = new Date(time * 1000);
+
+        return formatterWeekday.format(weekday);
+    }
+
     public static String getCountryCode() {
 
         String locale = Locale.getDefault().getLanguage(); // e.g. "de"
 
-        if (locale.equals(new Locale("de").getLanguage())) return "de";
-        else if (locale.equals(new Locale("en").getLanguage()) || locale.equals(new Locale("en-US").getLanguage()))
-            return "en";
-        else return "en";
+        if (locale.equals(new Locale("de").getLanguage())) {
+            return "de";
+        }
+        return "en";
     }
 
     public static int getWidgetBackgroundDrawable(int transparencyPercent) {
@@ -278,7 +293,7 @@ public final class Helper {
 
         String iconSetNumber = "01";
 
-        if(!sharedPrefs.getBoolean("colored_icons_switch", true)) {
+        if (!sharedPrefs.getBoolean("colored_icons_switch", true)) {
             iconSetNumber = "00";
         }
 
@@ -319,7 +334,7 @@ public final class Helper {
         return iconId;
     }
 
-    private static int getResId(String pString){
+    private static int getResId(String pString) {
         Context context = App.getContext();
         return context.getResources().getIdentifier(pString, "drawable", context.getPackageName());
     }

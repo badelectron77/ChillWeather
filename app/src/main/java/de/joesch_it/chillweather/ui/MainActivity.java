@@ -840,7 +840,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         gradientDrawable.setCornerRadius(0f);
         mNestedScrollView.setBackground(gradientDrawable);
 
-        //Log.v(TAG, current.getFormattedTimeForWidget());
         mTimeLabel.setText(getString(R.string.updated) + " " + current.getFormattedTime());
         mTemperatureLabel.setText(String.valueOf(temperature));
         mPrecipValue.setText(String.valueOf(current.getPrecipChance()) + " %");
