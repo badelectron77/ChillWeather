@@ -81,7 +81,6 @@
                 <action android:name="android.appwidget.action.APPWIDGET_DELETED"/>
                 <action android:name="android.appwidget.action.APPWIDGET_ENABLED"/>
                 <action android:name="android.appwidget.action.APPWIDGET_DISABLED"/>
-                <action android:name="de.joesch_it.chillweather.CHILL_WIDGET_UPDATE"/>
                 <action android:name="de.joesch_it.chillweather.CHILL_WIDGET_UPDATE2"/>
                 <action android:name="de.joesch_it.chillweather.WIDGET_BUTTON"/>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

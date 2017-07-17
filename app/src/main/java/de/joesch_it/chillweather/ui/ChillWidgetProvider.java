@@ -58,7 +58,6 @@ import okhttp3.Response;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
-import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_UPDATE;
 import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_UPDATE2;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
@@ -70,7 +69,6 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_LOCATION;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_TEMPERATURE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_UPDATED;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_OLD_ALARM_MANAGER_REMOVED;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_SOMETHING_WRITTEN;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
@@ -126,11 +124,6 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
     }
 
     private PendingIntent getChillWidgetUpdateIntent() {
-        Intent intent = new Intent(CHILL_WIDGET_UPDATE);
-        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    private PendingIntent getChillWidgetUpdateIntent2() {
         Intent intent = new Intent(CHILL_WIDGET_UPDATE2);
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
@@ -158,7 +151,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
         editor.apply();
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(getChillWidgetUpdateIntent2());
+        alarmManager.cancel(getChillWidgetUpdateIntent());
     }
 
     @Override
@@ -180,25 +173,16 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             views.setOnClickPendingIntent(R.id.widgetRefreshButton, refreshPendingIntent);
 
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-
-            // completely remove old AlarmManager PendingIntent ONCE
-            if(mSharedPref.getBoolean(PREF_KEY_OLD_ALARM_MANAGER_REMOVED, false)) {
-                SharedPreferences.Editor editor = mSharedPref.edit();
-                editor.putBoolean(PREF_KEY_OLD_ALARM_MANAGER_REMOVED, true);
-                editor.apply();
-                alarmManager.cancel(getChillWidgetUpdateIntent());
-            }
-
             if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis());
                 int maxDifferenceInHours = Integer.valueOf(mSharedPreferences.getString("autorefresh_frequency", "3"));
                 calendar.add(Calendar.HOUR, maxDifferenceInHours);
-                alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 3600 * 1000, getChillWidgetUpdateIntent2());
+                alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 3600 * 1000, getChillWidgetUpdateIntent());
                 // DEBUG: Minutes instead of hours
-                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getChillWidgetUpdateIntent2());
+                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getChillWidgetUpdateIntent());
             } else {
-                alarmManager.cancel(getChillWidgetUpdateIntent2());
+                alarmManager.cancel(getChillWidgetUpdateIntent());
             }
 
             updateChillWidget(context, appWidgetManager, appWidgetId, views);
