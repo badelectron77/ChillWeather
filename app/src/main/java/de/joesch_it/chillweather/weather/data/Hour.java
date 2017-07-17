@@ -12,7 +12,6 @@ import java.util.TimeZone;
 import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
-import de.joesch_it.chillweather.weather.Forecast;
 
 public class Hour implements Parcelable {
 
@@ -110,7 +109,7 @@ public class Hour implements Parcelable {
     }
 
     public int getIconId() {
-        return Forecast.getIconId(mIcon);
+        return Helper.getIconId(mIcon);
     }
 
     public String getHour() {
