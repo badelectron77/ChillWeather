@@ -59,6 +59,7 @@ import okhttp3.Response;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
 import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_UPDATE;
+import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_UPDATE2;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
 import static de.joesch_it.chillweather.helper.App.DISPLACEMENT_IN_METERS;
@@ -69,6 +70,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_LOCATION;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_TEMPERATURE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_UPDATED;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_OLD_ALARM_MANAGER_REMOVED;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_SOMETHING_WRITTEN;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
@@ -84,7 +86,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
     protected Location mCurrentLocation;
     protected LocationSettingsRequest mLocationSettingsRequest;
     protected SharedPreferences mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
-    private SharedPreferences sharedPref = mContext.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+    private SharedPreferences mSharedPref = mContext.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
     private double mLastLocationLatitude = DEFAULT_LOCATION_LATITUDE;
     private double mLastLocationLongitude = DEFAULT_LOCATION_LONGITUDE;
     private GoogleApiClient mGoogleApiClient;
@@ -101,7 +103,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                 || intent.getAction().equals(BOOT_COMPLETED)
                 || intent.getAction().equals(WIDGET_BUTTON)) {
 
-            SharedPreferences.Editor editor = sharedPref.edit();
+            SharedPreferences.Editor editor = mSharedPref.edit();
 
             if (intent.getAction().equals(WIDGET_BUTTON)) {
                 editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
@@ -128,10 +130,15 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
+    private PendingIntent getChillWidgetUpdateIntent2() {
+        Intent intent = new Intent(CHILL_WIDGET_UPDATE2);
+        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
-        SharedPreferences.Editor editor = sharedPref.edit();
+        SharedPreferences.Editor editor = mSharedPref.edit();
         editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
         editor.apply();
         //Log.v(TAG, "onEnabled()");
@@ -147,11 +154,11 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             mGoogleApiClient.disconnect();
         }
 
-        SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_SOMETHING_WRITTEN, false);
+        SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_SOMETHING_WRITTEN, false);
         editor.apply();
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(getChillWidgetUpdateIntent());
+        alarmManager.cancel(getChillWidgetUpdateIntent2());
     }
 
     @Override
@@ -173,16 +180,25 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             views.setOnClickPendingIntent(R.id.widgetRefreshButton, refreshPendingIntent);
 
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+            // completely remove old AlarmManager PendingIntent ONCE
+            if(mSharedPref.getBoolean(PREF_KEY_OLD_ALARM_MANAGER_REMOVED, false)) {
+                SharedPreferences.Editor editor = mSharedPref.edit();
+                editor.putBoolean(PREF_KEY_OLD_ALARM_MANAGER_REMOVED, true);
+                editor.apply();
+                alarmManager.cancel(getChillWidgetUpdateIntent());
+            }
+
             if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis());
                 int maxDifferenceInHours = Integer.valueOf(mSharedPreferences.getString("autorefresh_frequency", "3"));
                 calendar.add(Calendar.HOUR, maxDifferenceInHours);
-                alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 3600 * 1000, getChillWidgetUpdateIntent());
+                alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 3600 * 1000, getChillWidgetUpdateIntent2());
                 // DEBUG: Minutes instead of hours
-                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getChillWidgetUpdateIntent());
+                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getChillWidgetUpdateIntent2());
             } else {
-                alarmManager.cancel(getChillWidgetUpdateIntent());
+                alarmManager.cancel(getChillWidgetUpdateIntent2());
             }
 
             updateChillWidget(context, appWidgetManager, appWidgetId, views);
@@ -195,15 +211,15 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
         int transparency = Integer.valueOf(mSharedPreferences.getString("widget_transparency", "80"));
         updateViews.setInt(R.id.widgetLayout, "setBackgroundResource", Helper.getWidgetBackgroundDrawable(transparency));
 
-        boolean keepValues = sharedPref.getBoolean(PREF_KEY_KEEP_VALUES, false);
+        boolean keepValues = mSharedPref.getBoolean(PREF_KEY_KEEP_VALUES, false);
 
-        if (sharedPref.getBoolean(PREF_KEY_SHOW_LOADING, true) || !sharedPref.getBoolean(PREF_KEY_SOMETHING_WRITTEN, false)) {
+        if (mSharedPref.getBoolean(PREF_KEY_SHOW_LOADING, true) || !mSharedPref.getBoolean(PREF_KEY_SOMETHING_WRITTEN, false)) {
             showLoading(updateViews);
             //Log.v(TAG, "showLoading");
             if (!Helper.isNetworkAvailable(context)) {
                 updateViews.setTextViewText(R.id.widgetLoadingTextView, context.getString(R.string.network_is_unavailable));
             } else {
-                SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_SHOW_LOADING, false);
+                SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_SHOW_LOADING, false);
                 editor.apply();
             }
         }
@@ -226,13 +242,13 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             //Toast.makeText(context, "updateChillWidget() without forecast update", Toast.LENGTH_SHORT).show();
             //Log.v(TAG, "only orientation change");
             // only on orientation or design change
-            SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, false);
+            SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, false);
             editor.apply();
 
-            updateViews.setTextViewText(R.id.widgetDateLabel, context.getString(R.string.updated) + " " + sharedPref.getString(PREF_KEY_KEEP_UPDATED, "Please reload!"));
-            updateViews.setTextViewText(R.id.widgetTemperatureLabel, sharedPref.getString(PREF_KEY_KEEP_TEMPERATURE, ""));
-            updateViews.setTextViewText(R.id.widgetLocationLabel, sharedPref.getString(PREF_KEY_KEEP_LOCATION, "Please reload!"));
-            updateViews.setImageViewResource(R.id.widgetIconImageView, Helper.getIconId(sharedPref.getString(PREF_KEY_KEEP_ICON, "")));
+            updateViews.setTextViewText(R.id.widgetDateLabel, context.getString(R.string.updated) + " " + mSharedPref.getString(PREF_KEY_KEEP_UPDATED, context.getString(R.string.please_reload)));
+            updateViews.setTextViewText(R.id.widgetTemperatureLabel, mSharedPref.getString(PREF_KEY_KEEP_TEMPERATURE, ""));
+            updateViews.setTextViewText(R.id.widgetLocationLabel, mSharedPref.getString(PREF_KEY_KEEP_LOCATION, ""));
+            updateViews.setImageViewResource(R.id.widgetIconImageView, Helper.getIconId(mSharedPref.getString(PREF_KEY_KEEP_ICON, "")));
 
             updateViews.setViewVisibility(R.id.widgetTemperatureLabel, View.VISIBLE);
             updateViews.setViewVisibility(R.id.widgetLocationLabel, View.VISIBLE);
@@ -309,7 +325,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                             String iconString = current.getIconString();
                             int iconId = Helper.getIconId(iconString);
 
-                            SharedPreferences.Editor editor = sharedPref.edit();
+                            SharedPreferences.Editor editor = mSharedPref.edit();
                             editor.putBoolean(PREF_KEY_SOMETHING_WRITTEN, true);
                             editor.putString(PREF_KEY_KEEP_TEMPERATURE, temperatureString);
                             editor.putString(PREF_KEY_KEEP_ICON, iconString);
@@ -383,7 +399,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                                 locationName = mContext.getString(R.string.no_location_available);
                             }
 
-                            SharedPreferences.Editor editor = sharedPref.edit();
+                            SharedPreferences.Editor editor = mSharedPref.edit();
                             editor.putBoolean(PREF_KEY_SOMETHING_WRITTEN, true);
                             editor.putString(PREF_KEY_KEEP_LOCATION, locationName);
                             editor.apply();

@@ -32,6 +32,7 @@ public class App extends Application {
     public static final String PREF_KEY_APP_THEME = "PREF_KEY_APP_THEME";
     public static final String PREF_KEY_WIDGET_TRANSPARENCY = "PREF_KEY_WIDGET_TRANSPARENCY";
     public static final String PREF_KEY_SHOW_LOADING = "PREF_KEY_SHOW_LOADING";
+    public static final String PREF_KEY_OLD_ALARM_MANAGER_REMOVED = "PREF_KEY_OLD_ALARM_MANAGER_REMOVED";
     public static final String PREF_KEY_SOMETHING_WRITTEN = "PREF_KEY_SOMETHING_WRITTEN";
     public static final String PREF_KEY_KEEP_VALUES = "PREF_KEY_KEEP_VALUES";
     public static final String PREF_KEY_KEEP_TEMPERATURE = "PREF_KEY_KEEP_TEMPERATURE";
@@ -39,6 +40,7 @@ public class App extends Application {
     public static final String PREF_KEY_KEEP_LOCATION = "PREF_KEY_KEEP_LOCATION";
     public static final String PREF_KEY_KEEP_UPDATED = "PREF_KEY_KEEP_UPDATED";
     public static final String CHILL_WIDGET_UPDATE = "de.joesch_it.chillweather.CHILL_WIDGET_UPDATE";
+    public static final String CHILL_WIDGET_UPDATE2 = "de.joesch_it.chillweather.CHILL_WIDGET_UPDATE2";
     public static final String WIDGET_BUTTON = "de.joesch_it.chillweather.WIDGET_BUTTON";
     public static final String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
     public static final int DISPLACEMENT_IN_METERS = 100;
