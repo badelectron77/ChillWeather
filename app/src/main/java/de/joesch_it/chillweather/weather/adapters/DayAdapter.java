@@ -70,6 +70,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         }
 
         holder.dayLabel.setText(Helper.getDayOfTheWeek(day.getTime(), day.getTimezone()));
+        holder.dateLabel.setText(Helper.getWeekdayDate(day.getTime(), day.getTimezone()));
         holder.summaryLabel.setText(day.getSummary());
 
         if (position >= 0 && position <= 2) {
@@ -109,6 +110,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         TextView temperatureLabel;
         TextView dayLabel;
         TextView summaryLabel;
+        TextView dateLabel;
 
         DayViewHolder(View view) {
             super(view);
@@ -117,6 +119,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
             temperatureLabel = (TextView) view.findViewById(R.id.dailyListTemperatureLabel);
             dayLabel = (TextView) view.findViewById(R.id.dailyListWeekdayNameLabel);
             summaryLabel = (TextView) view.findViewById(R.id.dailyListSummaryTextView);
+            dateLabel = (TextView) view.findViewById(R.id.dailyListDateLabel);
         }
     }
 }

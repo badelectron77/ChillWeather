@@ -8,6 +8,37 @@
     android:layout_height="100dp"
     tools:background="#ffaa00">
 
+    <TextView
+        android:id="@+id/dailyListWeekdayNameLabel"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-light"
+        android:textColor="#ffffffff"
+        android:textSize="22sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Donnerstag"/>
+
+    <TextView
+        android:id="@+id/dailyListDateLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-light"
+        android:textColor="#ffffffff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dailyListWeekdayNameLabel"
+        tools:text="4. Juli"/>
+
     <ImageView
         android:id="@+id/circleImageView"
         android:layout_width="wrap_content"
@@ -33,22 +64,6 @@
         app:layout_constraintLeft_toRightOf="@+id/circleImageView"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/cloudy_night_00"/>
-
-    <TextView
-        android:id="@+id/dailyListWeekdayNameLabel"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="8dp"
-        android:fontFamily="sans-serif-light"
-        android:textColor="#ffffffff"
-        android:textSize="22sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Donnerstag"/>
 
     <TextView
         android:id="@+id/dailyListTemperatureLabel"
