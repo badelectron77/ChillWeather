@@ -151,15 +151,15 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        //Log.v(TAG, "onUpdate()");
 
         for (int appWidgetId : appWidgetIds) {
+            //Log.v(TAG, "onUpdate()");
 
             RemoteViews views = new RemoteViews(context.getPackageName(), getResId());
 
             // open MainActivity onClick on widget
             Intent openIntent = new Intent(context, MainActivity.class);
-            PendingIntent openPendingIntent = PendingIntent.getActivity(context, 0, openIntent, 0);
+            PendingIntent openPendingIntent = PendingIntent.getActivity(context, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.widgetLayout, openPendingIntent);
 
             // onClick listener on refresh button
