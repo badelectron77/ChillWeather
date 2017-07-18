@@ -19,7 +19,7 @@ import static de.joesch_it.chillweather.helper.Helper.updateWidget;
 
 public class App extends Application {
 
-    public static final String BUILD = "18.07.2017 12:35";
+    public static final String BUILD = "18.07.2017 19:36";
     public static final String STORE_URL = "https://play.google.com/store/apps/details?id=de.joesch_it.chillweather";
     public static final String TAG = " ### " + App.class.getSimpleName() + " ###";
     public static final String POSITION_TOMORROW = "POSITION_TOMORROW";

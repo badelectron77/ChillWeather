@@ -744,7 +744,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         switch (status) {
             case STATUS_GETTING_WEATHER:
-                // getting weather update
                 scrollToTop();
                 mSwipeRefreshLayout.setRefreshing(true);
 
@@ -766,7 +765,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 break;
 
             case STATUS_SHOW_WEATHER:
-                // show current weather
                 mNetworkIsUnavailable.setVisibility(View.INVISIBLE);
                 mSplashImageView.setVisibility(View.INVISIBLE);
 
@@ -790,7 +788,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 break;
 
             case STATUS_NO_NETWORK:
-                // show "network is unavailable" after app launch
 
                 if(mSwipeRefreshLayout.isRefreshing()) {
                     mSwipeRefreshLayout.setRefreshing(false);
@@ -825,6 +822,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     }
 
     public void alertUserAboutNoNetwork() {
+        if(mSwipeRefreshLayout.isRefreshing()) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
         Snackbar mySnackbar = Snackbar.make(mNestedScrollView, R.string.network_is_unavailable, Snackbar.LENGTH_LONG);
         mySnackbar.show();
     }
