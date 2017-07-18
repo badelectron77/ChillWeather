@@ -20,6 +20,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -126,8 +127,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     ImageView mIconImageView;
     @BindView(R.id.degreeTextView)
     TextView mDegreeTextView;
-    @BindView(R.id.progressBar)
-    ProgressBar mProgressBar;
     @BindView(R.id.locationLabel)
     TextView mLocationLabel;
     @BindView(R.id.networkIsUnavailable)
@@ -142,6 +141,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     ImageView mSplashImageView;
     @BindView(R.id.linearLayout)
     LinearLayout mLinearLayout;
+    @BindView(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout mSwipeRefreshLayout;
     private String GOOGLE_GEOCODING_API_KEY;
     private String DARKSKY_API_KEY;
     private boolean mSentJsonAlert;
@@ -224,6 +225,14 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mRefresh = true; // onLocationChanged() may call getForecast()
         toggleRefresh(STATUS_GETTING_WEATHER);
         getDelayedForecast(); // after some seconds getForecast() is definitely called
+
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getForecast();
+            }
+        });
     }
 
     @Override
@@ -737,7 +746,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             case STATUS_GETTING_WEATHER:
                 // getting weather update
                 scrollToTop();
-                mProgressBar.setVisibility(View.VISIBLE);
+                mSwipeRefreshLayout.setRefreshing(true);
 
                 if (mFirstStart) {
                     mFirstStart = false;
@@ -758,9 +767,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
             case STATUS_SHOW_WEATHER:
                 // show current weather
-                mProgressBar.setVisibility(View.INVISIBLE);
                 mNetworkIsUnavailable.setVisibility(View.INVISIBLE);
                 mSplashImageView.setVisibility(View.INVISIBLE);
+
+                if(mSwipeRefreshLayout.isRefreshing()) {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
 
                 mDegreeTextView.setVisibility(View.VISIBLE);
                 mIconImageView.setVisibility(View.VISIBLE);
@@ -780,7 +792,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             case STATUS_NO_NETWORK:
                 // show "network is unavailable" after app launch
 
-                mProgressBar.setVisibility(View.INVISIBLE);
+                if(mSwipeRefreshLayout.isRefreshing()) {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
 
                 mDegreeTextView.setVisibility(View.INVISIBLE);
                 mIconImageView.setVisibility(View.INVISIBLE);
