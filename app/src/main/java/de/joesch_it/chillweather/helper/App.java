@@ -32,7 +32,6 @@ public class App extends Application {
     public static final String PREF_KEY_APP_THEME = "PREF_KEY_APP_THEME";
     public static final String PREF_KEY_WIDGET_TRANSPARENCY = "PREF_KEY_WIDGET_TRANSPARENCY";
     public static final String PREF_KEY_SHOW_LOADING = "PREF_KEY_SHOW_LOADING";
-    public static final String PREF_KEY_SOMETHING_WRITTEN = "PREF_KEY_SOMETHING_WRITTEN";
     public static final String PREF_KEY_KEEP_VALUES = "PREF_KEY_KEEP_VALUES";
     public static final String PREF_KEY_KEEP_TEMPERATURE = "PREF_KEY_KEEP_TEMPERATURE";
     public static final String PREF_KEY_KEEP_ICON = "PREF_KEY_KEEP_ICON";

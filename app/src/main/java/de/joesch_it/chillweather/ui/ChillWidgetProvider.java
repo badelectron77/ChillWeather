@@ -70,7 +70,6 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_TEMPERATURE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_UPDATED;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_SHOW_LOADING;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_SOMETHING_WRITTEN;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
 import static de.joesch_it.chillweather.helper.App.WIDGET_BUTTON;
 
@@ -103,13 +102,9 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
 
             SharedPreferences.Editor editor = mSharedPref.edit();
 
-            if (intent.getAction().equals(WIDGET_BUTTON)) {
+            if (intent.getAction().equals(WIDGET_BUTTON)
+                    || intent.getAction().equals(BOOT_COMPLETED)) {
                 editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
-                editor.apply();
-            }
-
-            if (intent.getAction().equals(BOOT_COMPLETED)) {
-                editor.putBoolean(PREF_KEY_SOMETHING_WRITTEN, false);
                 editor.apply();
             }
 
@@ -147,7 +142,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             mGoogleApiClient.disconnect();
         }
 
-        SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_SOMETHING_WRITTEN, false);
+        SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_SHOW_LOADING, true);
         editor.apply();
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -197,9 +192,8 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
 
         boolean keepValues = mSharedPref.getBoolean(PREF_KEY_KEEP_VALUES, false);
 
-        if (mSharedPref.getBoolean(PREF_KEY_SHOW_LOADING, true) || !mSharedPref.getBoolean(PREF_KEY_SOMETHING_WRITTEN, false)) {
+        if (mSharedPref.getBoolean(PREF_KEY_SHOW_LOADING, true)) {
             showLoading(updateViews);
-            //Log.v(TAG, "showLoading");
             if (!Helper.isNetworkAvailable(context)) {
                 updateViews.setTextViewText(R.id.widgetLoadingTextView, context.getString(R.string.network_is_unavailable));
             } else {
@@ -310,7 +304,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                             int iconId = Helper.getIconId(iconString);
 
                             SharedPreferences.Editor editor = mSharedPref.edit();
-                            editor.putBoolean(PREF_KEY_SOMETHING_WRITTEN, true);
+                            editor.putBoolean(PREF_KEY_SHOW_LOADING, false);
                             editor.putString(PREF_KEY_KEEP_TEMPERATURE, temperatureString);
                             editor.putString(PREF_KEY_KEEP_ICON, iconString);
                             editor.putString(PREF_KEY_KEEP_UPDATED, dateString);
@@ -384,7 +378,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                             }
 
                             SharedPreferences.Editor editor = mSharedPref.edit();
-                            editor.putBoolean(PREF_KEY_SOMETHING_WRITTEN, true);
+                            editor.putBoolean(PREF_KEY_SHOW_LOADING, false);
                             editor.putString(PREF_KEY_KEEP_LOCATION, locationName);
                             editor.apply();
 
@@ -426,7 +420,6 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
 
     //<editor-fold desc="Location">
     private void startLocationStuff() {
-        boolean sentJsonAlert = false;
         mRequestingLocationUpdates = true;
         if (playServicesAvailable()) {
             buildGoogleApiClient();
@@ -452,7 +445,6 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
-            //Log.v(TAG, "buildGoogleApiClient()");
         }
     }
 
@@ -463,12 +455,10 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLIS);
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
             mLocationRequest.setSmallestDisplacement(DISPLACEMENT_IN_METERS);
-            //Log.v(TAG, "createLocationRequest()");
         }
     }
 
     protected void startLocationUpdates() {
-        //Log.v(TAG, "startLocationUpdates()");
         LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequest).setResultCallback(new ResultCallback<LocationSettingsResult>() {
             @Override
             public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
@@ -483,7 +473,6 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                         }
                         break;
                 }
-                //updateUI();
             }
         });
     }
@@ -504,7 +493,6 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
     }
 
     protected void stopLocationUpdates() {
-        //Log.v(TAG, "stopLocationUpdates()");
         if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient,
@@ -526,7 +514,6 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        //Log.v(TAG, "onConnected()");
         if (mCurrentLocation == null) {
             try {
                 mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -535,63 +522,28 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             }
         }
         if (mRequestingLocationUpdates) {
-            //Log.v(TAG, "in onConnected(), starting location updates");
             startLocationUpdates();
         }
         if (mCurrentLocation != null) {
             mLastLocationLatitude = mCurrentLocation.getLatitude();
             mLastLocationLongitude = mCurrentLocation.getLongitude();
         }
-        //getForecast(mLastLocationLatitude, mLastLocationLongitude);
-        //Log.i(TAG, "getForecast() in onConnected()");
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        //Log.i(TAG, "Connection suspended");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        //Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
     }
 
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
 
-        // after reboot of phone...
-        /*if (mLastLocationLatitude == DEFAULT_LOCATION_LATITUDE && mLastLocationLongitude == DEFAULT_LOCATION_LONGITUDE) {
-            getForecast(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-            Log.i(TAG, "getForecast() in onLocationChanged()");
-        }*/
-
         mLastLocationLatitude = mCurrentLocation.getLatitude();
         mLastLocationLongitude = mCurrentLocation.getLongitude();
-
-        // Köln
-        //mLastLocationLatitude = 50.937101;
-        //mLastLocationLongitude = 6.958117;
-
-        // Weiler bei Monzingen (test with spaces in city name)
-        //mLastLocationLatitude = 49.8278;
-        //mLastLocationLongitude = 7.53834;
-
-        // Anchorage
-        //mLastLocationLatitude = 61.199972;
-        //mLastLocationLongitude = -149.898872;
-
-        // Southern pacific, in the middle of nowhere
-        //mLastLocationLatitude = -65.487125;
-        //mLastLocationLongitude = -152.912444;
-
-        // Forsinard, Scotland
-        //mLastLocationLatitude = 58.358318;
-        //mLastLocationLongitude = -3.896534;
-
-        // Siberia
-        //mLastLocationLatitude = 76.217848;
-        //mLastLocationLongitude = 110.347490;
     }
     //</editor-fold>
 }
