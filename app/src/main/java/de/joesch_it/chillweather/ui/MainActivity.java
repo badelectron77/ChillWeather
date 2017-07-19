@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     protected final static String KEY_LOCATION = "KEY_LOCATION";
     protected static final int REQUEST_CHECK_SETTINGS = 0x1; // Constant used in the location settings dialog.
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
-    private static final int FORECAST_MAX_DELAY_IN_MILLIS = 6000;
+    private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
     static public Hour[] mHourlyForecast;
     protected Boolean mRequestingLocationUpdates;
     protected Location mCurrentLocation;
@@ -279,8 +279,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         }
 
         if (resumeRefresh) {
-            //mRefresh = true; // onLocationChanged() may call getForecast()
-            getForecast(); // after some seconds getForecast() is definitely called
+            // get a delayed Forecast do get the correct location first
+            getDelayedForecast();
         }
     }
 

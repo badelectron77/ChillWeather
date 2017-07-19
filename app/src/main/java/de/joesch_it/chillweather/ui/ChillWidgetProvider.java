@@ -387,7 +387,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                             if (Helper.isTablet()) {
                                 maxL = 25;
                             }
-                            if (length >= maxL) {
+                            if (length > maxL) {
                                 locationName = locationName.substring(0, Math.min(length, maxL)) + "...";
                             }
                             updateViews.setTextViewText(R.id.widgetLocationLabel, locationName);
