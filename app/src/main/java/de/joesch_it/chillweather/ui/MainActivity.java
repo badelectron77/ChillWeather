@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     protected Boolean mRequestingLocationUpdates;
     protected Location mCurrentLocation;
     protected LocationSettingsRequest mLocationSettingsRequest;
+    protected SharedPreferences mSharedPreferences;
     @BindView(R.id.darkskyImageView)
     ImageView mDarkskyImageView;
     @BindView(R.id.temperatureLabel)
@@ -157,10 +158,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private DayAdapter mAdapter;
     private boolean mMenuRefreshClicked = false;
     private boolean mFirstStart;
-    protected SharedPreferences mSharedPreferences;
     private boolean mColoredIcons;
     private boolean mTempColoredBackgrounds;
-    private boolean mRefresh;
     private String mAppTheme;
     //</editor-fold>
 
@@ -170,13 +169,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mAppTheme = mSharedPreferences.getString("app_theme", "0");
-        if(mAppTheme.equals("1")){
+        if (mAppTheme.equals("1")) {
             setTheme(R.style.AppThemeOrange);
         }
 
         setContentView(R.layout.activity_main);
 
-        if(mAppTheme.equals("0")){
+        if (mAppTheme.equals("0")) {
             // display App icon on blue Actionbar
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setIcon(R.mipmap.ic_launcher);
@@ -222,9 +221,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mDailyListRecyclerView.addItemDecoration(dividerItemDecoration);
 
         mFirstStart = true;
-        mRefresh = true; // onLocationChanged() may call getForecast()
         toggleRefresh(STATUS_GETTING_WEATHER);
-        getDelayedForecast(); // after some seconds getForecast() is definitely called
+        getDelayedForecast();
 
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -248,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         boolean resumeRefresh = false;
 
         // if "no network available" screen visible, do refresh
-        if(mNetworkIsUnavailable.getVisibility() == View.VISIBLE && Helper.isNetworkAvailable(this)) {
+        if (mNetworkIsUnavailable.getVisibility() == View.VISIBLE && Helper.isNetworkAvailable(this)) {
             resumeRefresh = true;
         }
 
@@ -259,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             long storedWeatherTime = mForecast.getCurrent().getTime();
             long nowTime = System.currentTimeMillis() / 1000L;
             long maxDifferenceInSeconds = actualMaxDifferenceInHoursForRefresh * 3600L;
-            if(maxDifferenceInSeconds > 0 && nowTime - storedWeatherTime > maxDifferenceInSeconds) {
+            if (maxDifferenceInSeconds > 0 && nowTime - storedWeatherTime > maxDifferenceInSeconds) {
                 resumeRefresh = true;
             }
         }
@@ -285,16 +283,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     }
 
     private void getDelayedForecast() {
-        // get Forecast after maximum some seconds of location updates
-        // onLocationChanged() is much faster than that in most cases
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                if(mRefresh) {
-                    mRefresh = false;
-                    getForecast();
-                }
-                //Toast.makeText(MainActivity.this, "getForecast() called by getDelayedForecast()", Toast.LENGTH_SHORT).show();
+                getForecast();
             }
         }, FORECAST_MAX_DELAY_IN_MILLIS);
     }
@@ -577,12 +569,6 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         mLastLocationLatitude = mCurrentLocation.getLatitude();
         mLastLocationLongitude = mCurrentLocation.getLongitude();
-
-        if (mRefresh) {
-            mRefresh = false;
-            getForecast();
-            //Toast.makeText(this, "getForecast() called by onLocationChanged()", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -768,7 +754,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 mNetworkIsUnavailable.setVisibility(View.INVISIBLE);
                 mSplashImageView.setVisibility(View.INVISIBLE);
 
-                if(mSwipeRefreshLayout.isRefreshing()) {
+                if (mSwipeRefreshLayout.isRefreshing()) {
                     mSwipeRefreshLayout.setRefreshing(false);
                 }
 
@@ -789,7 +775,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
             case STATUS_NO_NETWORK:
 
-                if(mSwipeRefreshLayout.isRefreshing()) {
+                if (mSwipeRefreshLayout.isRefreshing()) {
                     mSwipeRefreshLayout.setRefreshing(false);
                 }
 
@@ -822,7 +808,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     }
 
     public void alertUserAboutNoNetwork() {
-        if(mSwipeRefreshLayout.isRefreshing()) {
+        if (mSwipeRefreshLayout.isRefreshing()) {
             mSwipeRefreshLayout.setRefreshing(false);
         }
         Snackbar mySnackbar = Snackbar.make(mNestedScrollView, R.string.network_is_unavailable, Snackbar.LENGTH_LONG);
@@ -837,9 +823,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         int temperature = current.getTemperature();
         String unit = current.getUnit();
         int bottomBgColor;
-        if(mSharedPreferences.getBoolean("temperature_colored_background_switch", true)) {
+        if (mSharedPreferences.getBoolean("temperature_colored_background_switch", true)) {
             bottomBgColor = R.color.heaven_blue;
-            if(mAppTheme.equals("1")) {
+            if (mAppTheme.equals("1")) {
                 bottomBgColor = R.color.colorPrimaryOrange;
             }
         } else {
