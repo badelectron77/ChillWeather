@@ -24,15 +24,12 @@ android {
         // store
         versionProps.store(versionPropsFile.newWriter(), null)
 
-        // change here and in version.properties on major updates
-        def verName = "1.0." + verCode.toString()
-
         defaultConfig {
             applicationId "de.joesch_it.chillweather"
             minSdkVersion 16
             targetSdkVersion 25
-            versionCode verCode  // 34
-            versionName verName  // 1.0.34
+            versionCode verCode  // 1761
+            versionName "1.1.0"
             testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         }
     } else {

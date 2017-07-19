@@ -23,14 +23,14 @@
     <string name="this_app_was_built_by"><![CDATA[
     Chill Weather was developed by Stefan Josch. I appreciate suggestions, criticism and comments:
     <a href="mailto:stefan.joesch@joesch-it.de">e-mail</a>. The source code can be accessed on
-    <a href="https://github.com/badelectron77/ChillWeather">GitHub</a>.
+    <a href="https://github.com/badelectron77/ChillWeather">GitHub</a>. Visit my
+    <a href="https://joesch-it.de/">Website</a>!
     ]]></string>
     <string name="open_with">Open with</string>
     <string name="version">Version</string>
     <string name="libraries_list" translatable="false"><![CDATA[
     <a href="https://jakewharton.github.io/butterknife/">ButterKnife</a>,
     <a href="https://github.com/google/gson">google-gson</a>,
-    <a href="https://github.com/DreaminginCodeZH/MaterialProgressBar">MaterialProgressBar</a>,
     <a href="http://square.github.io/okhttp/">OkHttp</a>
     ]]></string>
     <string name="icons_list"><![CDATA[
