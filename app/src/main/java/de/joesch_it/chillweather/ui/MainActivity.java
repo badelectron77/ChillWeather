@@ -21,6 +21,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -33,7 +34,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     protected final static String KEY_LOCATION = "KEY_LOCATION";
     protected static final int REQUEST_CHECK_SETTINGS = 0x1; // Constant used in the location settings dialog.
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
-    private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
+    private static final int FORECAST_MAX_DELAY_IN_MILLIS = 1500;
     static public Hour[] mHourlyForecast;
     protected Boolean mRequestingLocationUpdates;
     protected Location mCurrentLocation;
@@ -136,12 +136,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     RecyclerView mDailyListRecyclerView;
     @BindView(R.id.nestedScrollView)
     NestedScrollView mNestedScrollView;
-    @BindView(R.id.locationIconImageView)
-    ImageView mLocationIconImageView;
+    @BindView(R.id.location_date_linear_layout)
+    LinearLayout mLocationIconDateLinearLayout;
     @BindView(R.id.splashImageView)
     ImageView mSplashImageView;
-    @BindView(R.id.linearLayout)
-    LinearLayout mLinearLayout;
+    @BindView(R.id.humidity_rain_linear_layout)
+    LinearLayout mhumidityRainLinearLayout;
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout mSwipeRefreshLayout;
     private String GOOGLE_GEOCODING_API_KEY;
@@ -161,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private boolean mColoredIcons;
     private boolean mTempColoredBackgrounds;
     private String mAppTheme;
+    private boolean mTempPhotoBackground;
     //</editor-fold>
 
     @Override
@@ -177,10 +178,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         if (mAppTheme.equals("0")) {
             // display App icon on blue Actionbar
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setIcon(R.mipmap.ic_launcher);
-            getSupportActionBar().setDisplayShowTitleEnabled(true);
-            getSupportActionBar().setTitle("  " + getString(R.string.app_name));
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setIcon(R.mipmap.ic_launcher);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setTitle("  " + getString(R.string.app_name));
+            //actionBar.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
         ButterKnife.bind(this);
@@ -216,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         mColoredIcons = mSharedPreferences.getBoolean("colored_icons_switch", true);
         mTempColoredBackgrounds = mSharedPreferences.getBoolean("temperature_colored_background_switch", true);
+        mTempPhotoBackground = mSharedPreferences.getBoolean("photo_background_switch", true);
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         mDailyListRecyclerView.addItemDecoration(dividerItemDecoration);
@@ -276,6 +280,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             resumeRefresh = true;
         }
 
+        // refresh photo background if user changed background settings
+        boolean actualTempPhotoBackground = mSharedPreferences.getBoolean("photo_background_switch", true);
+        if (mTempPhotoBackground != actualTempPhotoBackground) {
+            mTempPhotoBackground = actualTempPhotoBackground;
+            resumeRefresh = true;
+        }
+
         if (resumeRefresh) {
             // get a delayed Forecast do get the correct location first
             getDelayedForecast();
@@ -299,6 +310,34 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                 + "/" + mLastLocationLatitude + "," + mLastLocationLongitude
                 + "?lang=" + locale + "&units=auto&exclude=minutely";
         //Log.v(TAG, forecastUrl);
+
+        // Köln
+        //mLastLocationLatitude = 50.937101
+        //mLastLocationLongitude = 6.958117
+
+        // Weiler bei Monzingen (test with spaces in city name)
+        //mLastLocationLatitude = 49.8278
+        //mLastLocationLongitude = 7.53834
+
+        // Anchorage
+        //mLastLocationLatitude = 61.199972
+        //mLastLocationLongitude = -149.898872
+
+        // Southern pacific, in the middle of nowhere
+        //mLastLocationLatitude = -65.487125
+        //mLastLocationLongitude = -152.912444
+
+        // Forsinard, Scotland
+        //mLastLocationLatitude = 58.358318
+        //mLastLocationLongitude = -3.896534
+
+        // Siberia
+        //mLastLocationLatitude = 76.217848
+        //mLastLocationLongitude = 110.347490
+
+        // Paleochora
+        //mLastLocationLatitude = 35.231418
+        //mLastLocationLongitude = 23.680851
 
         if (Helper.isNetworkAvailable(this)) {
 
@@ -739,13 +778,11 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     mDarkskyImageView.setVisibility(View.INVISIBLE);
                     mDegreeTextView.setVisibility(View.INVISIBLE);
                     mIconImageView.setVisibility(View.INVISIBLE);
-                    mLinearLayout.setVisibility(View.INVISIBLE);
+                    mhumidityRainLinearLayout.setVisibility(View.INVISIBLE);
                     mTemperatureLabel.setVisibility(View.INVISIBLE);
-                    mLocationLabel.setVisibility(View.INVISIBLE);
-                    mLocationIconImageView.setVisibility(View.INVISIBLE);
+                    mLocationIconDateLinearLayout.setVisibility(View.INVISIBLE);
                     mSummaryLabel.setVisibility(View.INVISIBLE);
                     mDailyListRecyclerView.setVisibility(View.INVISIBLE);
-                    mTimeLabel.setVisibility(View.INVISIBLE);
                 }
 
                 break;
@@ -760,14 +797,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                 mDegreeTextView.setVisibility(View.VISIBLE);
                 mIconImageView.setVisibility(View.VISIBLE);
-                mLinearLayout.setVisibility(View.VISIBLE);
+                mhumidityRainLinearLayout.setVisibility(View.VISIBLE);
                 mTemperatureLabel.setVisibility(View.VISIBLE);
-                mTimeLabel.setVisibility(View.VISIBLE);
                 mSummaryLabel.setVisibility(View.VISIBLE);
                 mDailyListRecyclerView.setVisibility(View.VISIBLE);
 
-                mLocationLabel.setVisibility(View.VISIBLE);
-                mLocationIconImageView.setVisibility(View.VISIBLE);
+                mLocationIconDateLinearLayout.setVisibility(View.VISIBLE);
 
                 mDarkskyImageView.setVisibility(View.VISIBLE);
 
@@ -781,14 +816,12 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
                 mDegreeTextView.setVisibility(View.INVISIBLE);
                 mIconImageView.setVisibility(View.INVISIBLE);
-                mLinearLayout.setVisibility(View.INVISIBLE);
+                mhumidityRainLinearLayout.setVisibility(View.INVISIBLE);
                 mTemperatureLabel.setVisibility(View.INVISIBLE);
-                mLocationLabel.setVisibility(View.INVISIBLE);
-                mLocationIconImageView.setVisibility(View.INVISIBLE);
+                mLocationIconDateLinearLayout.setVisibility(View.INVISIBLE);
                 mSummaryLabel.setVisibility(View.INVISIBLE);
                 mDailyListRecyclerView.setVisibility(View.INVISIBLE);
                 mDarkskyImageView.setVisibility(View.INVISIBLE);
-                mTimeLabel.setVisibility(View.INVISIBLE);
 
                 mNetworkIsUnavailable.setVisibility(View.VISIBLE);
                 mNetworkIsUnavailable.setText(R.string.network_is_unavailable);
@@ -822,30 +855,67 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         // background for current temperature
         int temperature = current.getTemperature();
         String unit = current.getUnit();
-        int bottomBgColor;
-        if (mSharedPreferences.getBoolean("temperature_colored_background_switch", true)) {
-            bottomBgColor = R.color.heaven_blue;
-            if (mAppTheme.equals("1")) {
-                bottomBgColor = R.color.colorPrimaryOrange;
+        String iconString = current.getIconString();
+        boolean transparent = true;
+        //Log.v(TAG, iconString);
+
+        if (mSharedPreferences.getBoolean("photo_background_switch", true)) {
+
+            switch (iconString) {
+                case "rain":
+                    transparent = false;
+                    break;
+                case "snow":
+                    transparent = false;
+                    break;
+                case "sleet":
+                    transparent = false;
+                    break;
+                case "wind":
+                    transparent = false;
+                    break;
+                case "cloudy":
+                    transparent = false;
+                    break;
+                case "partly-cloudy-day":
+                    transparent = false;
+                    break;
+                default:
+                    transparent = true;
             }
+
+            int backgroundPhoto = Helper.getPhotoBackgroundIconId(iconString);
+            mNestedScrollView.setBackgroundResource(backgroundPhoto);
+            //mNestedScrollView.setBackgroundResource(R.drawable.cloudy_big);
+
         } else {
-            bottomBgColor = R.color.colorPrimary;
+            int bottomBgColor;
+            if (mSharedPreferences.getBoolean("temperature_colored_background_switch", true)) {
+                bottomBgColor = R.color.heaven_blue;
+                if (mAppTheme.equals("1")) {
+                    bottomBgColor = R.color.colorPrimaryOrange;
+                }
+            } else {
+                bottomBgColor = R.color.colorPrimary;
+            }
+            GradientDrawable gradientDrawable = new GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    new int[]{
+                            Color.parseColor(Helper.getTemperatureColor(temperature, unit)),
+                            ContextCompat.getColor(this, bottomBgColor)}
+            );
+            gradientDrawable.setCornerRadius(0f);
+            mNestedScrollView.setBackground(gradientDrawable);
         }
-        GradientDrawable gradientDrawable = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{
-                        Color.parseColor(Helper.getTemperatureColor(temperature, unit)),
-                        ContextCompat.getColor(this, bottomBgColor)}
-        );
-        gradientDrawable.setCornerRadius(0f);
-        mNestedScrollView.setBackground(gradientDrawable);
+
+        toggleBackgroundDrawable(transparent);
 
         mTimeLabel.setText(getString(R.string.updated) + " " + current.getFormattedTime());
         mTemperatureLabel.setText(String.valueOf(temperature));
         mPrecipValue.setText(String.valueOf(current.getPrecipChance()) + " %");
         mHumidityValue.setText(String.valueOf(current.getHumidity()) + " %");
         mSummaryLabel.setText(String.valueOf(current.getSummary()));
-        Drawable drawable = ContextCompat.getDrawable(this, Helper.getIconId(current.getIconString()));
+        Drawable drawable = ContextCompat.getDrawable(this, Helper.getIconId(iconString));
         mIconImageView.setImageDrawable(drawable);
 
         if (!mDayList.isEmpty()) {
@@ -857,6 +927,21 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         mNestedScrollView.setFocusableInTouchMode(true);
         mNestedScrollView.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
+    }
+
+    private void toggleBackgroundDrawable(boolean transparent) {
+
+        int backGroundDrawable = R.drawable.bg_text_transparent;
+        if(!transparent) {
+            // visible
+            backGroundDrawable = R.drawable.bg_text_pointed_corners;
+            mSummaryLabel.setBackgroundResource(R.drawable.bg_text_round_corners);
+        } else {
+            mSummaryLabel.setBackgroundResource(backGroundDrawable);
+        }
+
+        mLocationIconDateLinearLayout.setBackgroundResource(backGroundDrawable);
+        mhumidityRainLinearLayout.setBackgroundResource(backGroundDrawable);
     }
 
     @Override

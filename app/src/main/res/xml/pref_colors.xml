@@ -11,6 +11,12 @@
 
     <SwitchPreference
         android:defaultValue="true"
+        android:key="photo_background_switch"
+        android:summary="@string/pref_description_photo_background"
+        android:title="@string/pref_title_photo_background"/>
+
+    <SwitchPreference
+        android:defaultValue="true"
         android:key="colored_icons_switch"
         android:summary="@string/pref_description_colored_icons"
         android:title="@string/pref_title_colored_icons"/>

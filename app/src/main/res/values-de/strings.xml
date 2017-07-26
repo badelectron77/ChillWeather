@@ -39,8 +39,12 @@
     <string name="ok">OK</string>
     <string name="pref_header_data_sync">Aktualisierung</string>
     <string name="pref_header_notifications">Benachrichtigungen</string>
+
     <string name="pref_title_colored_icons">Bunte Icons</string>
     <string name="pref_description_colored_icons">Bunte Wetter-Icons statt einfarbiger Icons</string>
+
+    <string name="pref_title_photo_background">Foto Hintergrund</string>
+    <string name="pref_description_photo_background">Foto-Hintergrund statt verschiendener Farben in aktueller Ansicht</string>
 
     <string name="pref_title_app_theme">App Look</string>
     <string-array name="pref_app_theme_titles">
@@ -100,10 +104,12 @@
 
     <string name="pref_description_temperature_colored_background">Temperaturabhängige Hintergrundfarben für alle Ansichten</string>
     <string name="pref_title_temperature_colored_background">Temperaturabh. Hintergrundfarben</string>
+
     <string name="pref_title_autorefresh_weather_switch">Automatisch Wetter aktualisieren</string>
     <string name="pref_description_autorefresh_weather_switch">Automatische Aktualisierung der Wetterdaten in bestimmten Intervallen</string>
+
     <string name="used_weather_service">Verwendeter Wetterservice:</string>
-    <string name="no_location_available">kein Ort möglich</string>
+    <string name="no_location_available">ohne Ort</string>
     <string name="searching">Suche…</string>
     <string name="updated">Akt.</string>
     <string name="loading">Lade…</string>

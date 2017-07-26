@@ -334,6 +334,45 @@ public final class Helper {
         return iconId;
     }
 
+    public static int getPhotoBackgroundIconId(String iconString) {
+
+        int iconId = getResId("clear_day_big");
+
+        switch (iconString) {
+            case "clear-day":
+                iconId = getResId("clear_day_big");
+                break;
+            case "clear-night":
+                iconId = getResId("clear_night_big");
+                break;
+            case "rain":
+                iconId = getResId("rain_big");
+                break;
+            case "snow":
+                iconId = getResId("snow_big");
+                break;
+            case "sleet":
+                iconId = getResId("sleet_big");
+                break;
+            case "wind":
+                iconId = getResId("wind_big");
+                break;
+            case "fog":
+                iconId = getResId("fog_big");
+                break;
+            case "cloudy":
+                iconId = getResId("cloudy_big");
+                break;
+            case "partly-cloudy-day":
+                iconId = getResId("partly_cloudy_day_big");
+                break;
+            case "partly-cloudy-night":
+                iconId = getResId("partly_cloudy_night_big");
+                break;
+        }
+        return iconId;
+    }
+
     private static int getResId(String pString) {
         Context context = App.getContext();
         return context.getResources().getIdentifier(pString, "drawable", context.getPackageName());
