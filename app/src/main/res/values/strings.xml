@@ -52,6 +52,9 @@
     <string name="pref_title_colored_icons">Colored icons</string>
     <string name="pref_description_colored_icons">Use colored weather icons instead of monochrome icons</string>
 
+    <string name="pref_title_photo_background">Photo Background</string>
+    <string name="pref_description_photo_background">Use photo background instead of colored background in current view</string>
+
     <string name="pref_title_temperature_colored_background">Temperature-dependent colors</string>
     <string name="pref_description_temperature_colored_background">Use temperature-dependent colors for backgrounds</string>
 
