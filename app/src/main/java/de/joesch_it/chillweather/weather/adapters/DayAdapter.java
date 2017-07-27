@@ -114,12 +114,12 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
 
         DayViewHolder(View view) {
             super(view);
-            constraintLayout = (ConstraintLayout) view.findViewById(R.id.dailyListConstraintLayout);
-            iconImageView = (ImageView) view.findViewById(R.id.dailyListIconImageView);
-            temperatureLabel = (TextView) view.findViewById(R.id.dailyListTemperatureLabel);
-            dayLabel = (TextView) view.findViewById(R.id.dailyListWeekdayNameLabel);
-            summaryLabel = (TextView) view.findViewById(R.id.dailyListSummaryTextView);
-            dateLabel = (TextView) view.findViewById(R.id.dailyListDateLabel);
+            constraintLayout = view.findViewById(R.id.dailyListConstraintLayout);
+            iconImageView = view.findViewById(R.id.dailyListIconImageView);
+            temperatureLabel = view.findViewById(R.id.dailyListTemperatureLabel);
+            dayLabel = view.findViewById(R.id.dailyListWeekdayNameLabel);
+            summaryLabel = view.findViewById(R.id.dailyListSummaryTextView);
+            dateLabel = view.findViewById(R.id.dailyListDateLabel);
         }
     }
 }

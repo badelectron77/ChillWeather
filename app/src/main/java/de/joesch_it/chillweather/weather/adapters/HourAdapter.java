@@ -56,13 +56,13 @@ public class HourAdapter extends BaseAdapter {
 
             convertView = LayoutInflater.from(mContext).inflate(resId, parent, false);
             holder = new ViewHolder();
-            holder.layout = (ConstraintLayout) convertView.findViewById(R.id.hourlyListConstraintLayout);
-            holder.iconImageView = (ImageView) convertView.findViewById(R.id.hourlyListIconImageView);
-            holder.temperatureLabel = (TextView) convertView.findViewById(R.id.hourlyListTemperatureLabel);
-            holder.weekdayLabel = (TextView) convertView.findViewById(R.id.hourlyListWeekdayNameLabel);
-            holder.summaryLabel = (TextView) convertView.findViewById(R.id.hourlyListSummaryTextView);
-            holder.hourLabel = (TextView) convertView.findViewById(R.id.hourlyListHourTextView);
-            holder.amPmLabel = (TextView) convertView.findViewById(R.id.hourlyListAmPmTextView);
+            holder.layout = convertView.findViewById(R.id.hourlyListConstraintLayout);
+            holder.iconImageView = convertView.findViewById(R.id.hourlyListIconImageView);
+            holder.temperatureLabel = convertView.findViewById(R.id.hourlyListTemperatureLabel);
+            holder.weekdayLabel = convertView.findViewById(R.id.hourlyListWeekdayNameLabel);
+            holder.summaryLabel = convertView.findViewById(R.id.hourlyListSummaryTextView);
+            holder.hourLabel = convertView.findViewById(R.id.hourlyListHourTextView);
+            holder.amPmLabel = convertView.findViewById(R.id.hourlyListAmPmTextView);
             convertView.setTag(holder);
         }
         else {

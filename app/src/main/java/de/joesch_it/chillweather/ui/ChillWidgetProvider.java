@@ -2,6 +2,7 @@ package de.joesch_it.chillweather.ui;
 
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -12,11 +13,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -104,6 +107,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
 
             if (intent.getAction().equals(WIDGET_BUTTON)
                     || intent.getAction().equals(BOOT_COMPLETED)) {
+                // show "loading" after boot completed or after widget refresh button clicked
                 editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
                 editor.apply();
             }
@@ -184,8 +188,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
         }
     }
 
-    public void updateChillWidget(Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, final RemoteViews updateViews) {
-        //Log.v(TAG, "updateChillWidget()");
+    public void updateChillWidget(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, final RemoteViews updateViews) {
 
         int transparency = Integer.valueOf(mSharedPreferences.getString("widget_transparency", "80"));
         updateViews.setInt(R.id.widgetLayout, "setBackgroundResource", Helper.getWidgetBackgroundDrawable(transparency));
@@ -195,15 +198,29 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
         if (mSharedPref.getBoolean(PREF_KEY_SHOW_LOADING, true)) {
             showLoading(updateViews);
             if (!Helper.isNetworkAvailable(context)) {
+                // no network
                 updateViews.setTextViewText(R.id.widgetLoadingTextView, context.getString(R.string.network_is_unavailable));
+
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        // show latest values after some seconds, if we have them
+                        if(!mSharedPref.getString(PREF_KEY_KEEP_TEMPERATURE, "").isEmpty()) {
+                            loadOldValues(context, updateViews);
+                            appWidgetManager.updateAppWidget(appWidgetId, updateViews);
+                        }
+                    }
+                }, 2000);
+
             } else {
+                // network available
                 SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_SHOW_LOADING, false);
                 editor.apply();
             }
         }
 
         if (Helper.isNetworkAvailable(context) && !keepValues) {
-            //Log.v(TAG, "!keepValues");
+
             startLocationStuff();
 
             // get Forecast after some seconds of location updates
@@ -217,28 +234,29 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
         }
 
         if (keepValues) {
-            //Toast.makeText(context, "updateChillWidget() without forecast update", Toast.LENGTH_SHORT).show();
-            //Log.v(TAG, "only orientation change");
             // only on orientation or design change
             SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, false);
             editor.apply();
-
-            updateViews.setTextViewText(R.id.widgetDateLabel, context.getString(R.string.updated) + " " + mSharedPref.getString(PREF_KEY_KEEP_UPDATED, context.getString(R.string.please_reload)));
-            updateViews.setTextViewText(R.id.widgetTemperatureLabel, mSharedPref.getString(PREF_KEY_KEEP_TEMPERATURE, ""));
-            updateViews.setTextViewText(R.id.widgetLocationLabel, mSharedPref.getString(PREF_KEY_KEEP_LOCATION, ""));
-            updateViews.setImageViewResource(R.id.widgetIconImageView, Helper.getIconId(mSharedPref.getString(PREF_KEY_KEEP_ICON, "")));
-
-            updateViews.setViewVisibility(R.id.widgetTemperatureLabel, View.VISIBLE);
-            updateViews.setViewVisibility(R.id.widgetLocationLabel, View.VISIBLE);
-            updateViews.setViewVisibility(R.id.widgetIconImageView, View.VISIBLE);
-            updateViews.setViewVisibility(R.id.widgetLocationIconImageView, View.VISIBLE);
-            updateViews.setViewVisibility(R.id.widgetDateLabel, View.VISIBLE);
-            updateViews.setViewVisibility(R.id.widgetRefreshButton, View.VISIBLE);
-
-            updateViews.setViewVisibility(R.id.widgetLoadingTextView, View.INVISIBLE);
-
+            loadOldValues(context, updateViews);
         }
         appWidgetManager.updateAppWidget(appWidgetId, updateViews);
+    }
+
+    private void loadOldValues(Context context, RemoteViews updateViews) {
+
+        updateViews.setTextViewText(R.id.widgetDateLabel, context.getString(R.string.updated) + " " + mSharedPref.getString(PREF_KEY_KEEP_UPDATED, context.getString(R.string.please_reload)));
+        updateViews.setTextViewText(R.id.widgetTemperatureLabel, mSharedPref.getString(PREF_KEY_KEEP_TEMPERATURE, ""));
+        updateViews.setTextViewText(R.id.widgetLocationLabel, mSharedPref.getString(PREF_KEY_KEEP_LOCATION, ""));
+        updateViews.setImageViewResource(R.id.widgetIconImageView, Helper.getIconId(mSharedPref.getString(PREF_KEY_KEEP_ICON, "")));
+
+        updateViews.setViewVisibility(R.id.widgetTemperatureLabel, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLocationLabel, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetIconImageView, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLocationIconImageView, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetDateLabel, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetRefreshButton, View.VISIBLE);
+
+        updateViews.setViewVisibility(R.id.widgetLoadingTextView, View.INVISIBLE);
     }
 
     private int getResId() {
@@ -469,27 +487,12 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
                         try {
                             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, ChillWidgetProvider.this);
                         } catch (SecurityException e) {
-                            showPermissionNotification();
+                            //
                         }
                         break;
                 }
             }
         });
-    }
-
-    private void showPermissionNotification() {
-        Intent notificationIntent = new Intent(mContext, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, notificationIntent, 0);
-        Notification notification = new Notification.Builder(mContext)
-                .setContentTitle(mContext.getText(R.string.need_multiple_permissions))
-                .setContentText(mContext.getText(R.string.this_app_needs_location_permission))
-                .setLargeIcon(BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher))
-                .setSmallIcon(R.mipmap.ic_launcher_white)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build();
-        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(0, notification);
     }
 
     protected void stopLocationUpdates() {
@@ -518,7 +521,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
             try {
                 mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             } catch (SecurityException e) {
-                showPermissionNotification();
+                //
             }
         }
         if (mRequestingLocationUpdates) {

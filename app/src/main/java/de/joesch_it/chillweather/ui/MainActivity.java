@@ -164,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     private List<Day> mDayList = new ArrayList<>();
     private DayAdapter mAdapter;
     private boolean mMenuRefreshClicked = false;
+    private boolean mRefreshSwiped = false;
     private boolean mFirstStart;
     private boolean mColoredIcons;
     private boolean mTempColoredBackgrounds;
@@ -245,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mRefreshSwiped = true;
                 getForecast();
             }
         });
@@ -253,6 +255,9 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     @Override
     public void onResume() {
         super.onResume();
+
+        mMenuRefreshClicked = false;
+        mRefreshSwiped = false;
 
         if(mSharedPreferences.getString("app_theme", "2").equals("2")) {
             makeToolBarTransparent();
@@ -405,17 +410,23 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         } else {
             // no network available
             alertUserAboutNoNetwork();
-            if (!mMenuRefreshClicked) {
+            if (!mMenuRefreshClicked && !mRefreshSwiped) {
+                // user didn't clicked refresh button AND did not swipe to refresh
                 // After starting the app show the "no network" screen. But don't show this screen
-                // when the user clicked the refresh button! He rather reads old data than no data.
+                // when the user clicked the refresh button or swiped to refresh! He rather reads old data than no data.
                 toggleRefresh(STATUS_NO_NETWORK);
             }
         }
+
         if (mSentJsonAlert) {
             // Problems with json request.
             mSentJsonAlert = false;
             alertUserAboutNoNetwork();
         }
+
+        // reset variables
+        if(mMenuRefreshClicked) mMenuRefreshClicked = false;
+        if(mRefreshSwiped) mRefreshSwiped = false;
     }
 
     private Forecast parseForecastDetails(String jsonData) throws JSONException {
@@ -746,19 +757,18 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         switch (item.getItemId()) {
             case R.id.refreshMenuIcon:
                 mMenuRefreshClicked = true;
-                //mGetForecastLocked = false;
                 getForecast();
                 break;
             case R.id.hourlyIcon:
                 if (mForecast != null) {
+                    // we have a Forecast instance
                     Intent intentHourly = new Intent(this, HourlyForecastActivity.class);
                     intentHourly.putExtra(HOURLY_FORECAST, mForecast.getHourlyForecast());
                     // ACRA debugging line:
                     //intentHourly.putExtra("blubb", mForecast.getHourlyForecast());
                     startActivity(intentHourly);
                 } else {
-                    mMenuRefreshClicked = true;
-                    //mGetForecastLocked = false;
+                    // we have no Forecast instance
                     getForecast();
                 }
                 break;
