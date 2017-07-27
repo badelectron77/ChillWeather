@@ -64,10 +64,12 @@
     <string-array name="pref_app_theme_titles">
         <item>Blue</item>
         <item>Orange</item>
+        <item>Transparent</item>
     </string-array>
     <string-array name="pref_app_theme_values">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
     </string-array>
 
     <string name="pref_title_autorefresh_frequency">Refresh weather data every…</string>

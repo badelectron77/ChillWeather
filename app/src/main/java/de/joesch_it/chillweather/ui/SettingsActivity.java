@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +16,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
@@ -29,6 +32,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_SWITCH;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_COLORED_ICONS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_WIDGET_TRANSPARENCY;
+import static de.joesch_it.chillweather.helper.App.getContext;
 import static de.joesch_it.chillweather.helper.Helper.updateWidget;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
@@ -156,7 +160,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if(sharedPreferences.getString("app_theme", "0").equals("1")){
-            //setTheme(R.style.SettingsThemeOrange);
             theme.applyStyle(R.style.SettingsThemeOrange, true);
         } else {
             theme.applyStyle(resId, true);
@@ -166,7 +169,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            // Show the Up button in the action bar.
+            // prevent ActionBar from being transparent when coming from MainActivity
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            int color = ContextCompat.getColor(this, R.color.colorPrimary);
+            if(sharedPreferences.getString("app_theme", "0").equals("1")) {
+                color = ContextCompat.getColor(this, R.color.colorPrimaryOrange);
+            }
+            actionBar.setBackgroundDrawable(new ColorDrawable(color));
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }

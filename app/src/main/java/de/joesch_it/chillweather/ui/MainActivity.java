@@ -1,6 +1,8 @@
 package de.joesch_it.chillweather.ui;
 
 
+import android.animation.ObjectAnimator;
+import android.animation.StateListAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,22 +14,25 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -136,6 +141,8 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     RecyclerView mDailyListRecyclerView;
     @BindView(R.id.nestedScrollView)
     NestedScrollView mNestedScrollView;
+    @BindView(R.id.coordinator_layout)
+    CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.location_date_linear_layout)
     LinearLayout mLocationIconDateLinearLayout;
     @BindView(R.id.splashImageView)
@@ -170,20 +177,26 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mAppTheme = mSharedPreferences.getString("app_theme", "0");
-        if (mAppTheme.equals("1")) {
-            setTheme(R.style.AppThemeOrange);
-        }
-
-        setContentView(R.layout.activity_main);
-
-        if (mAppTheme.equals("0")) {
-            // display App icon on blue Actionbar
-            ActionBar actionBar = getSupportActionBar();
-            actionBar.setDisplayShowHomeEnabled(true);
-            actionBar.setIcon(R.mipmap.ic_launcher);
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setTitle("  " + getString(R.string.app_name));
-            //actionBar.setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        switch (mAppTheme) {
+            case "0":
+                setTheme(R.style.WeHaveAToolbarAndNoActionBar);
+                setContentView(R.layout.activity_main);
+                makeNormalToolBar();
+                break;
+            case "1":
+                setTheme(R.style.WeHaveAToolbarAndNoActionBarOrange);
+                setContentView(R.layout.activity_main);
+                makeNormalToolBar();
+                break;
+            default:
+                setTheme(R.style.WeHaveAToolbarAndNoActionBar);
+                setContentView(R.layout.activity_main);
+                makeToolBarTransparent();
+                // Status Bar Color
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    getWindow().setStatusBarColor(Color.parseColor("#25000000"));
+                }
+                break;
         }
 
         ButterKnife.bind(this);
@@ -240,6 +253,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     @Override
     public void onResume() {
         super.onResume();
+
+        if(mSharedPreferences.getString("app_theme", "0").equals("2")) {
+            makeToolBarTransparent();
+        }
 
         scrollToTop();
 
@@ -836,6 +853,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             public void run() {
                 //mNestedScrollView.smoothScrollTo(0,0);
                 mNestedScrollView.fullScroll(View.FOCUS_UP);
+                //mAppBar.setExpanded(true, true);
             }
         });
     }
@@ -859,7 +877,13 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         boolean transparent = true;
         //Log.v(TAG, iconString);
 
-        if (mSharedPreferences.getBoolean("photo_background_switch", true)) {
+        boolean withPhoto = mSharedPreferences.getBoolean("photo_background_switch", true);
+        int background = R.drawable.bg_gradient;
+        if(mAppTheme.equals("1")) {
+            background = R.drawable.bg_gradient_orange;
+        }
+
+        if (withPhoto) {
 
             switch (iconString) {
                 case "rain":
@@ -884,11 +908,15 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
                     transparent = true;
             }
 
-            int backgroundPhoto = Helper.getPhotoBackgroundIconId(iconString);
-            mNestedScrollView.setBackgroundResource(backgroundPhoto);
-            //mNestedScrollView.setBackgroundResource(R.drawable.cloudy_big);
+            background = Helper.getPhotoBackgroundIconId(iconString);
+            mNestedScrollView.setBackgroundResource(R.drawable.bg_transparent);
+            getWindow().setBackgroundDrawableResource(background);
 
+        } else if (!withPhoto && mSharedPreferences.getString("app_theme", "0").equals("2")) {
+            // no photo AND transparent theme
+            getWindow().setBackgroundDrawableResource(background);
         } else {
+            getWindow().setBackgroundDrawableResource(background);
             int bottomBgColor;
             if (mSharedPreferences.getBoolean("temperature_colored_background_switch", true)) {
                 bottomBgColor = R.color.heaven_blue;
@@ -908,7 +936,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             mNestedScrollView.setBackground(gradientDrawable);
         }
 
-        toggleBackgroundDrawable(transparent);
+        toggleTextBackgroundDrawable(transparent);
 
         mTimeLabel.setText(getString(R.string.updated) + " " + current.getFormattedTime());
         mTemperatureLabel.setText(String.valueOf(temperature));
@@ -929,7 +957,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         mNestedScrollView.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
     }
 
-    private void toggleBackgroundDrawable(boolean transparent) {
+    private void toggleTextBackgroundDrawable(boolean transparent) {
 
         int backGroundDrawable = R.drawable.bg_text_transparent;
         if(!transparent) {
@@ -942,6 +970,28 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         mLocationIconDateLinearLayout.setBackgroundResource(backGroundDrawable);
         mhumidityRainLinearLayout.setBackgroundResource(backGroundDrawable);
+    }
+
+    private void makeNormalToolBar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
+        // no transparent Toolbar (doesen't work on Android 4 devices)
+        setSupportActionBar(toolbar);
+    }
+
+    private void makeToolBarTransparent() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
+        // transparent Toolbar (doesen't work on Android 4 devices)
+        toolbar.getBackground().setAlpha(0);
+        setSupportActionBar(toolbar);
+
+        // remove shadow under toolbar
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            StateListAnimator stateListAnimator;
+            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_main);
+            stateListAnimator = new StateListAnimator();
+            stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(appBarLayout, "elevation", 0));
+            appBarLayout.setStateListAnimator(stateListAnimator);
+        }
     }
 
     @Override

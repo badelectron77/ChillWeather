@@ -46,14 +46,16 @@
     <string name="pref_title_photo_background">Foto Hintergrund</string>
     <string name="pref_description_photo_background">Foto-Hintergrund statt verschiendener Farben in aktueller Ansicht</string>
 
-    <string name="pref_title_app_theme">App Look</string>
+    <string name="pref_title_app_theme">Obere Leiste</string>
     <string-array name="pref_app_theme_titles">
         <item>Blau</item>
         <item>Orange</item>
+        <item>Transparent</item>
     </string-array>
     <string-array name="pref_app_theme_values">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
     </string-array>
 
     <string name="pref_title_autorefresh_frequency">Aktualisiere das Wetter…</string>

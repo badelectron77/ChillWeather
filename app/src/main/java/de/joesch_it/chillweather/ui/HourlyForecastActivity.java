@@ -2,10 +2,14 @@ package de.joesch_it.chillweather.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ListView;
 
@@ -28,12 +32,21 @@ public class HourlyForecastActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if(sharedPreferences.getString("app_theme", "0").equals("1")){
-            setTheme(R.style.AppThemeOrange);
+        String theme = sharedPreferences.getString("app_theme", "0");
+        if (theme.equals("1")) {
+            setTheme(R.style.HourlyThemeOrange);
+        }
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            if (theme.equals("2")) {
+                int color = ContextCompat.getColor(this, R.color.colorPrimary);
+                actionBar.setBackgroundDrawable(new ColorDrawable(color));
+            }
+            actionBar.setTitle(R.string.hourly);
         }
         setContentView(R.layout.activity_hourly_forecast);
         mListView = (ListView) findViewById(R.id.hourlyListView);
-        getSupportActionBar().setTitle(R.string.hourly);
 
         Intent intent = getIntent();
         Parcelable[] parcelables = intent.getParcelableArrayExtra(HOURLY_FORECAST);

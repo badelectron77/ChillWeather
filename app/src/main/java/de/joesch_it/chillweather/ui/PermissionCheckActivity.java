@@ -38,10 +38,6 @@ public class PermissionCheckActivity extends AppCompatActivity {
         }
 
         // permissions not granted, so we proceed with the permissions check
-        SharedPreferences themeSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if(themeSharedPreferences.getString("app_theme", "0").equals("1")){
-            setTheme(R.style.AppThemeOrange);
-        }
         setContentView(R.layout.activity_permission_check);
 
         SharedPreferences sharedPreferences = getSharedPreferences(PREF_KEY_FILE, MODE_PRIVATE);
