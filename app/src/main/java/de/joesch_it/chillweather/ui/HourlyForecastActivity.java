@@ -32,7 +32,7 @@ public class HourlyForecastActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String theme = sharedPreferences.getString("app_theme", "0");
+        String theme = sharedPreferences.getString("app_theme", "2");
         if (theme.equals("1")) {
             setTheme(R.style.HourlyThemeOrange);
         }

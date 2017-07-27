@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
         super.onCreate(savedInstanceState);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mAppTheme = mSharedPreferences.getString("app_theme", "0");
+        mAppTheme = mSharedPreferences.getString("app_theme", "2");
         switch (mAppTheme) {
             case "0":
                 setTheme(R.style.WeHaveAToolbarAndNoActionBar);
@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     public void onResume() {
         super.onResume();
 
-        if(mSharedPreferences.getString("app_theme", "0").equals("2")) {
+        if(mSharedPreferences.getString("app_theme", "2").equals("2")) {
             makeToolBarTransparent();
         }
 
@@ -912,7 +912,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
             mNestedScrollView.setBackgroundResource(R.drawable.bg_transparent);
             getWindow().setBackgroundDrawableResource(background);
 
-        } else if (!withPhoto && mSharedPreferences.getString("app_theme", "0").equals("2")) {
+        } else if (!withPhoto && mSharedPreferences.getString("app_theme", "2").equals("2")) {
             // no photo AND transparent theme
             getWindow().setBackgroundDrawableResource(background);
         } else {

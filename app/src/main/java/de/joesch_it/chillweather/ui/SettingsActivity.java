@@ -57,7 +57,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                 // App Theme
                 if (String.valueOf(preference).contains(context.getString(R.string.pref_title_app_theme))
-                        && !stringValue.equals(sharedPref.getString(PREF_KEY_APP_THEME, "0"))) {
+                        && !stringValue.equals(sharedPref.getString(PREF_KEY_APP_THEME, "2"))) {
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString(PREF_KEY_APP_THEME, stringValue);
                     editor.apply();
@@ -159,7 +159,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onApplyThemeResource(Resources.Theme theme, int resId, boolean first) {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if(sharedPreferences.getString("app_theme", "0").equals("1")){
+        if(sharedPreferences.getString("app_theme", "2").equals("1")){
             theme.applyStyle(R.style.SettingsThemeOrange, true);
         } else {
             theme.applyStyle(resId, true);
@@ -172,7 +172,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // prevent ActionBar from being transparent when coming from MainActivity
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             int color = ContextCompat.getColor(this, R.color.colorPrimary);
-            if(sharedPreferences.getString("app_theme", "0").equals("1")) {
+            if(sharedPreferences.getString("app_theme", "2").equals("1")) {
                 color = ContextCompat.getColor(this, R.color.colorPrimaryOrange);
             }
             actionBar.setBackgroundDrawable(new ColorDrawable(color));
