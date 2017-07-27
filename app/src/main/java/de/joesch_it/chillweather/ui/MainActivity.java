@@ -933,7 +933,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
 
         int backGroundDrawable = R.drawable.bg_text_transparent;
         if(!transparent) {
-            // visible
+            // Background drawable is visible
             backGroundDrawable = R.drawable.bg_text_pointed_corners;
             mSummaryLabel.setBackgroundResource(R.drawable.bg_text_round_corners);
         } else {
