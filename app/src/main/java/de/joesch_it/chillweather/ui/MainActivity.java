@@ -100,7 +100,8 @@ import static de.joesch_it.chillweather.helper.App.STORE_URL;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
 import static de.joesch_it.chillweather.helper.App.permissionsRequired;
 
-public class MainActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+public class MainActivity extends AppCompatActivity
+        implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
     public static final String TAG = " ### " + MainActivity.class.getSimpleName() + " ###";
@@ -1011,27 +1012,3 @@ public class MainActivity extends AppCompatActivity implements ConnectionCallbac
     }
     //</editor-fold>
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

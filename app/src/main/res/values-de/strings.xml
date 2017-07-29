@@ -48,14 +48,14 @@
 
     <string name="pref_title_app_theme">Obere Leiste</string>
     <string-array name="pref_app_theme_titles">
+        <item>Transparent</item>
         <item>Blau</item>
         <item>Orange</item>
-        <item>Transparent</item>
     </string-array>
     <string-array name="pref_app_theme_values">
+        <item>2</item>
         <item>0</item>
         <item>1</item>
-        <item>2</item>
     </string-array>
 
     <string name="pref_title_autorefresh_frequency">Aktualisiere das Wetter…</string>

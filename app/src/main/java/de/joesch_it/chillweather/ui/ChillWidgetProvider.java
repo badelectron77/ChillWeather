@@ -1,9 +1,6 @@
 package de.joesch_it.chillweather.ui;
 
 import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -11,15 +8,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -59,7 +53,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
 import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_UPDATE2;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
@@ -76,7 +69,8 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
 import static de.joesch_it.chillweather.helper.App.WIDGET_BUTTON;
 
-public class ChillWidgetProvider extends AppWidgetProvider implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+public class ChillWidgetProvider extends AppWidgetProvider
+        implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
     public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
@@ -130,6 +124,8 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
+        //Log.v(TAG, "onEnabled()");
+
         SharedPreferences.Editor editor = mSharedPref.edit();
         editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
         editor.apply();
@@ -189,6 +185,7 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
     }
 
     public void updateChillWidget(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, final RemoteViews updateViews) {
+        //Log.v(TAG, "updateChillWidget()");
 
         int transparency = Integer.valueOf(mSharedPreferences.getString("widget_transparency", "80"));
         updateViews.setInt(R.id.widgetLayout, "setBackgroundResource", Helper.getWidgetBackgroundDrawable(transparency));
@@ -550,4 +547,3 @@ public class ChillWidgetProvider extends AppWidgetProvider implements Connection
     }
     //</editor-fold>
 }
-
