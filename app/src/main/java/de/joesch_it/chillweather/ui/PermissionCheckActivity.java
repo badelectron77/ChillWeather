@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -22,7 +21,7 @@ import static de.joesch_it.chillweather.helper.App.permissionsRequired;
 
 public class PermissionCheckActivity extends AppCompatActivity {
 
-    public static final String TAG = " ### " + PermissionCheckActivity.class.getSimpleName() + " ###";
+    //public static final String TAG = " ### " + PermissionCheckActivity.class.getSimpleName() + " ###";
     private boolean mSentToSettings = false;
 
     @Override protected void onCreate(Bundle savedInstanceState) {

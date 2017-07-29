@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
-    public static final String TAG = " ### " + MainActivity.class.getSimpleName() + " ###";
+    //public static final String TAG = " ### " + MainActivity.class.getSimpleName() + " ###";
     protected static final int STATUS_GETTING_WEATHER = 200;
     protected static final int STATUS_SHOW_WEATHER = 201;
     protected static final int STATUS_NO_NETWORK = 202;

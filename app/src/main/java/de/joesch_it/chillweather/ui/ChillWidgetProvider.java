@@ -73,7 +73,7 @@ public class ChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
-    public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
+    //public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
     private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
     private final Context mContext = App.getContext();
     protected Boolean mRequestingLocationUpdates;

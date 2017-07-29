@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,12 +31,11 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_SWITCH;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_COLORED_ICONS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_WIDGET_TRANSPARENCY;
-import static de.joesch_it.chillweather.helper.App.getContext;
 import static de.joesch_it.chillweather.helper.Helper.updateWidget;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
-    public static final String TAG = " ### " + SettingsActivity.class.getSimpleName() + " ###";
+    //public static final String TAG = " ### " + SettingsActivity.class.getSimpleName() + " ###";
 
     //<editor-fold desc="OnPreferenceChangeListener">
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
