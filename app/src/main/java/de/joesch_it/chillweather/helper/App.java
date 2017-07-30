@@ -38,7 +38,9 @@ public class App extends Application {
     public static final String PREF_KEY_KEEP_LOCATION = "PREF_KEY_KEEP_LOCATION";
     public static final String PREF_KEY_KEEP_UPDATED = "PREF_KEY_KEEP_UPDATED";
     public static final String CHILL_WIDGET_UPDATE2 = "de.joesch_it.chillweather.CHILL_WIDGET_UPDATE2";
-    public static final String WIDGET_BUTTON = "de.joesch_it.chillweather.WIDGET_BUTTON";
+    public static final String BIG_CHILL_WIDGET_UPDATE = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE";
+    public static final String BIG_CHILL_WIDGET_BUTTON = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON";
+    public static final String CHILL_WIDGET_BUTTON = "de.joesch_it.chillweather.CHILL_WIDGET_BUTTON";
     public static final String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
     public static final int DISPLACEMENT_IN_METERS = 100;
     public static final long UPDATE_INTERVAL_IN_MILLIS = 3000; // The desired interval for location updates. Inexact.

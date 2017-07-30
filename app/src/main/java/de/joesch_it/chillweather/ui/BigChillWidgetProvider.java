@@ -1,5 +1,6 @@
 package de.joesch_it.chillweather.ui;
 
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -69,7 +70,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
 import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_BUTTON;
 
-public class ChillWidgetProvider extends AppWidgetProvider
+public class BigChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
@@ -482,7 +483,7 @@ public class ChillWidgetProvider extends AppWidgetProvider
                     case LocationSettingsStatusCodes.SUCCESS:
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         try {
-                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, ChillWidgetProvider.this);
+                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, BigChillWidgetProvider.this);
                         } catch (SecurityException e) {
                             //
                         }
