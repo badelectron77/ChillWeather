@@ -106,6 +106,9 @@
                 android:resource="@xml/chill_weather_widget_big_info"/>
         </receiver>
 
+        <service android:name=".helper.UpdateJob"
+                 android:permission="android.permission.BIND_JOB_SERVICE" />
+
     </application>
 
 </manifest>

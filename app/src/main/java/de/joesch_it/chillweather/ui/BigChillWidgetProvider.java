@@ -1,8 +1,11 @@
 package de.joesch_it.chillweather.ui;
 
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
@@ -10,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -48,6 +52,7 @@ import java.util.Locale;
 import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
+import de.joesch_it.chillweather.helper.UpdateJob;
 import de.joesch_it.chillweather.weather.Forecast;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.deserializer.CurrentDeserializer;
@@ -96,7 +101,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        //Log.v(TAG, "onReceive()");
+        Log.v(TAG, "onReceive()");
 
         if (intent.getAction().equals(BIG_CHILL_WIDGET_UPDATE)
                 || intent.getAction().equals(BOOT_COMPLETED)
@@ -169,6 +174,13 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(getBigChillWidgetUpdateIntent());
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            //later e.g. when update is disabled
+            jobScheduler.cancel(UpdateJob.JOB_ID);
+        }
     }
 
     @Override
@@ -189,14 +201,16 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.bigWidgetRefreshButton, refreshPendingIntent);
 
-            // update every minute
-            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + 1);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), 60000, getBigChillWidgetUpdateIntent());
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+                JobInfo.Builder builder = new JobInfo.Builder(UpdateJob.JOB_ID, new ComponentName(context, UpdateJob.class));
+                builder.setPeriodic(60000); // in every sec
+                jobScheduler.schedule(builder.build());
+                /*if (jobScheduler.schedule(builder.build()) <= 0) {
+                    //error, cant be scheduled
+                }*/
+            }
 
             updateBigChillWidget(context, appWidgetManager, appWidgetId, views);
         }

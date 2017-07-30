@@ -23,8 +23,10 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import de.joesch_it.chillweather.R;
+import de.joesch_it.chillweather.ui.BigChillWidgetProvider;
 import de.joesch_it.chillweather.ui.ChillWidgetProvider;
 
+import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
 
@@ -56,6 +58,16 @@ public final class Helper {
         Intent intent = new Intent(context, ChillWidgetProvider.class);
         intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
         int ids[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, ChillWidgetProvider.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        context.sendBroadcast(intent);
+    }
+
+    static void updateBigWidget() {
+
+        Context context = App.getContext();
+        Intent intent = new Intent(context, BigChillWidgetProvider.class);
+        intent.setAction(BIG_CHILL_WIDGET_UPDATE);
+        int ids[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, BigChillWidgetProvider.class));
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
         context.sendBroadcast(intent);
     }
