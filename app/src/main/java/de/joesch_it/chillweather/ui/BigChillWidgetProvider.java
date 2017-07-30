@@ -103,36 +103,30 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                 || intent.getAction().equals(BIG_CHILL_WIDGET_BUTTON)) {
 
             SharedPreferences.Editor editor = mSharedPref.edit();
-
+            boolean keepValues = true;
 
             boolean doRefresh = mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true);
             int actualMaxDifferenceInHoursForRefresh = Integer.valueOf(mSharedPreferences.getString("autorefresh_frequency", "3"));
-
             if (doRefresh) {
-
                 long nowTime = System.currentTimeMillis() / 1000L; // current time in seconds
                 long lastRefreshTime = mSharedPref.getLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
-
                 long maxDifferenceInSeconds = actualMaxDifferenceInHoursForRefresh * 3600L;
-                //Log.v(TAG, String.valueOf(maxDifferenceInSeconds));
-
                 if (maxDifferenceInSeconds > 0 && nowTime - lastRefreshTime > maxDifferenceInSeconds) {
                     // refresh weather data
-                    //Log.v(TAG, "drin");
-                    editor.putBoolean(PREF_KEY_BIG_KEEP_VALUES, false);
+                    keepValues = false;
                     editor.putLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
-                } else {
-                    editor.putBoolean(PREF_KEY_BIG_KEEP_VALUES, true);
                 }
-                editor.apply();
             }
 
             if (intent.getAction().equals(BIG_CHILL_WIDGET_BUTTON)
                     || intent.getAction().equals(BOOT_COMPLETED)) {
                 // show "loading" after boot completed or after widget refresh button clicked
                 editor.putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
-                editor.apply();
+                keepValues = false;
             }
+
+            editor.putBoolean(PREF_KEY_BIG_KEEP_VALUES, keepValues);
+            editor.apply();
 
             ComponentName thisAppWidget = new ComponentName(mContext.getPackageName(), getClass().getName());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
