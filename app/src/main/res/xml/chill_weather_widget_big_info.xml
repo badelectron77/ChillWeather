@@ -3,7 +3,7 @@
                     android:initialKeyguardLayout="@layout/widget_chill_weather_big"
                     android:initialLayout="@layout/widget_chill_weather_big"
                     android:minHeight="50dp"
-                    android:minWidth="260dp"
+                    android:minWidth="290dp"
                     android:resizeMode="horizontal|vertical"
                     android:updatePeriodMillis="60000"
                     android:widgetCategory="home_screen">

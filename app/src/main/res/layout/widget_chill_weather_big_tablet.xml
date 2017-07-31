@@ -1,10 +1,17 @@
 <LinearLayout
+    android:id="@+id/bigWidgetLayout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:weightSum="2"
+    android:paddingBottom="4dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="4dp"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:paddingStart="4dp"
     android:background="@drawable/bg_widget_100"
     tools:background="#4d4dff">
 
@@ -13,23 +20,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:gravity="center_vertical"
         android:fontFamily="sans-serif-thin"
         android:includeFontPadding="false"
         android:textColor="@android:color/white"
-        android:textSize="65sp"
+        android:textSize="70sp"
         tools:text="17:23"
         tools:visibility="visible"/>
 
     <RelativeLayout
-        android:id="@+id/bigWidgetLayout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:paddingBottom="0dp"
+        android:gravity="center_vertical"
         android:paddingEnd="4dp"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
         android:paddingStart="4dp"
+        android:paddingBottom="0dp"
         android:paddingTop="0dp">
 
         <TextView
@@ -39,15 +47,15 @@
             android:fontFamily="sans-serif-thin"
             android:includeFontPadding="false"
             android:textColor="@android:color/white"
-            android:textSize="40sp"
+            android:textSize="50sp"
             android:visibility="invisible"
             tools:text="25°"
             tools:visibility="visible"/>
 
         <ImageView
             android:id="@+id/bigWidgetIconImageView"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignBottom="@id/widgetTemperatureLabel"
             android:layout_alignTop="@+id/bigWidgetTemperatureLabel"
             android:layout_marginLeft="4dp"
