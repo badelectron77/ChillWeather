@@ -100,14 +100,12 @@
                 <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE"/>
                 <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON"/>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.TIME_TICK"/>
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/chill_weather_widget_big_info"/>
         </receiver>
-
-        <service android:name=".helper.UpdateJob"
-                 android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>
 

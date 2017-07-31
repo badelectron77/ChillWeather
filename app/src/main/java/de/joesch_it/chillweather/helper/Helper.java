@@ -62,7 +62,7 @@ public final class Helper {
         context.sendBroadcast(intent);
     }
 
-    static void updateBigWidget() {
+    public static void updateBigWidget() {
 
         Context context = App.getContext();
         Intent intent = new Intent(context, BigChillWidgetProvider.class);

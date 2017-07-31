@@ -1,19 +1,17 @@
 package de.joesch_it.chillweather.ui;
 
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -52,7 +50,6 @@ import java.util.Locale;
 import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
-import de.joesch_it.chillweather.helper.UpdateJob;
 import de.joesch_it.chillweather.weather.Forecast;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.deserializer.CurrentDeserializer;
@@ -78,6 +75,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_WIDGET_REFRESH_TIME;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
+import static de.joesch_it.chillweather.helper.Helper.updateBigWidget;
 
 public class BigChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
@@ -95,6 +93,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     private double mLastLocationLongitude = DEFAULT_LOCATION_LONGITUDE;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private BroadcastReceiver receiver;
     //</editor-fold>
 
     //<editor-fold desc="AppWidgetProvider">
@@ -133,12 +132,13 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             editor.putBoolean(PREF_KEY_BIG_KEEP_VALUES, keepValues);
             editor.apply();
 
-            ComponentName thisAppWidget = new ComponentName(mContext.getPackageName(), getClass().getName());
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
-            int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
-            for (int appWidgetID : ids) {
+            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            int appWidgetIds[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
+
+            for (int appWidgetID : appWidgetIds) {
                 RemoteViews views = new RemoteViews(context.getPackageName(), getResId());
-                updateBigChillWidget(mContext, appWidgetManager, appWidgetID, views);
+                updateBigChillWidget(context, appWidgetManager, appWidgetID, views);
             }
         }
     }
@@ -172,14 +172,8 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
         editor.apply();
 
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(getBigChillWidgetUpdateIntent());
-
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-            //later e.g. when update is disabled
-            jobScheduler.cancel(UpdateJob.JOB_ID);
+        if (receiver != null) {
+            context.getApplicationContext().unregisterReceiver(receiver);
         }
     }
 
@@ -201,16 +195,26 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.bigWidgetRefreshButton, refreshPendingIntent);
 
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-                JobInfo.Builder builder = new JobInfo.Builder(UpdateJob.JOB_ID, new ComponentName(context, UpdateJob.class));
-                builder.setPeriodic(60000); // in every sec
-                jobScheduler.schedule(builder.build());
-                /*if (jobScheduler.schedule(builder.build()) <= 0) {
-                    //error, cant be scheduled
-                }*/
+            // update every second
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(System.currentTimeMillis());
+                alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), 60 * 1000, getBigChillWidgetUpdateIntent());
+                // DEBUG: Minutes instead of hours
+                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getBigChillWidgetUpdateIntent());
+            } else {
+                alarmManager.cancel(getBigChillWidgetUpdateIntent());
             }
+            receiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context ctx, Intent intent) {
+                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
+                        updateBigWidget();
+                    }
+                }
+            };
+            context.getApplicationContext().registerReceiver(receiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
             updateBigChillWidget(context, appWidgetManager, appWidgetId, views);
         }
