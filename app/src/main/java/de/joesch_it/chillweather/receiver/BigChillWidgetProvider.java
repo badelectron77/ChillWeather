@@ -1,4 +1,4 @@
-package de.joesch_it.chillweather.service;
+package de.joesch_it.chillweather.receiver;
 
 
 import android.app.AlarmManager;
@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -81,7 +82,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
-    public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
+    public static final String TAG = " ### " + BigChillWidgetProvider.class.getSimpleName() + " ###";
     private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
     private final Context mContext = App.getContext();
     protected Boolean mRequestingLocationUpdates;
@@ -100,7 +101,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        //Log.v(TAG, "onReceive()");
+        //Log.v(TAG, "onReceive() in groß");
 
         if (intent.getAction().equals(BIG_CHILL_WIDGET_UPDATE)
                 || intent.getAction().equals(BOOT_COMPLETED)
@@ -207,7 +208,11 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             receiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context ctx, Intent intent) {
-                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
+                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0
+                            || intent.getAction().compareTo(Intent.ACTION_TIME_CHANGED) == 0
+                            || intent.getAction().compareTo(Intent.ACTION_TIMEZONE_CHANGED) == 0
+                            || intent.getAction().compareTo(Intent.ACTION_DATE_CHANGED) == 0
+                            ) {
                         updateBigWidgetClock();
                     }
                 }
@@ -228,13 +233,12 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         updateViews.setTextViewText(R.id.bigWidgetClockLabel, getFormattedMinuteTimeForBigWidget());
 
         boolean keepValues = mSharedPref.getBoolean(PREF_KEY_BIG_KEEP_VALUES, false);
-        //Log.v(TAG, String.valueOf(keepValues));
 
         if (mSharedPref.getBoolean(PREF_KEY_BIG_SHOW_LOADING, true)) {
             showLoading(updateViews);
             if (!Helper.isNetworkAvailable(context)) {
                 // no network
-                updateViews.setTextViewText(R.id.widgetLoadingTextView, context.getString(R.string.network_is_unavailable));
+                updateViews.setTextViewText(R.id.bigWidgetLoadingTextView, context.getString(R.string.network_is_unavailable));
 
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -337,7 +341,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
     //<editor-fold desc="getForecast">
     private void getForecast(final AppWidgetManager appWidgetManager, final RemoteViews updateViews, final int appWidgetId) {
-        //Log.v(TAG, "getForecast");
+        //Log.v(TAG, "getForecast() in groß");
 
         String DARKSKY_API_KEY = mContext.getString(R.string.darksky_api_key);
 

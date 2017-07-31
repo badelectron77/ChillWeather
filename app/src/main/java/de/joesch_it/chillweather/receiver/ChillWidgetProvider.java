@@ -1,4 +1,4 @@
-package de.joesch_it.chillweather.service;
+package de.joesch_it.chillweather.receiver;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -55,6 +56,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
+import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_BUTTON;
 import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_UPDATE2;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
@@ -68,13 +70,12 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_UPDATED;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
-import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_BUTTON;
 
 public class ChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
-    //public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
+    public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
     private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
     private final Context mContext = App.getContext();
     protected Boolean mRequestingLocationUpdates;
@@ -92,20 +93,24 @@ public class ChillWidgetProvider extends AppWidgetProvider
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        //Log.v(TAG, "onReceive()");
+        //Log.v(TAG, "onReceive() in klein");
 
         if (intent.getAction().equals(CHILL_WIDGET_UPDATE2)
                 || intent.getAction().equals(BOOT_COMPLETED)
                 || intent.getAction().equals(CHILL_WIDGET_BUTTON)) {
 
             SharedPreferences.Editor editor = mSharedPref.edit();
+            boolean keepValues = true;
 
             if (intent.getAction().equals(CHILL_WIDGET_BUTTON)
                     || intent.getAction().equals(BOOT_COMPLETED)) {
                 // show "loading" after boot completed or after widget refresh button clicked
                 editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
-                editor.apply();
+                keepValues = false;
             }
+
+            editor.putBoolean(PREF_KEY_KEEP_VALUES, keepValues);
+            editor.apply();
 
             ComponentName thisAppWidget = new ComponentName(mContext.getPackageName(), getClass().getName());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
@@ -285,6 +290,7 @@ public class ChillWidgetProvider extends AppWidgetProvider
 
     //<editor-fold desc="getForecast">
     private void getForecast(final AppWidgetManager appWidgetManager, final RemoteViews updateViews, final int appWidgetId) {
+        //Log.v(TAG, "getForecast() in klein");
 
         String DARKSKY_API_KEY = mContext.getString(R.string.darksky_api_key);
 

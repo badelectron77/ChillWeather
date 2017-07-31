@@ -15,12 +15,12 @@ import java.lang.ref.WeakReference;
 import de.joesch_it.chillweather.R;
 
 import static de.joesch_it.chillweather.helper.Helper.updateBigWidget;
-import static de.joesch_it.chillweather.helper.Helper.updateWidget;
+import static de.joesch_it.chillweather.helper.Helper.updateSmallWidget;
 
 
 public class App extends Application {
 
-    public static final String BUILD = "31.07.2017 13:08";
+    public static final String BUILD = "31.07.2017 15:01";
     public static final String STORE_URL = "https://play.google.com/store/apps/details?id=de.joesch_it.chillweather";
     //public static final String TAG = " ### " + App.class.getSimpleName() + " ###";
     public static final String POSITION_TOMORROW = "POSITION_TOMORROW";
@@ -98,7 +98,7 @@ public class App extends Application {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         //Log.v(TAG, "onConfigurationChanged()");
-        updateWidget(this, true); // design & AlarmManager refresh
-        updateBigWidget(this, true); // design & AlarmManager refresh
+        updateSmallWidget(this);
+        updateBigWidget(this);
     }
 }

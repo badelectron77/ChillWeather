@@ -23,8 +23,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import de.joesch_it.chillweather.R;
-import de.joesch_it.chillweather.service.BigChillWidgetProvider;
-import de.joesch_it.chillweather.service.ChillWidgetProvider;
+import de.joesch_it.chillweather.receiver.BigChillWidgetProvider;
+import de.joesch_it.chillweather.receiver.ChillWidgetProvider;
 
 import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
@@ -47,14 +47,12 @@ public final class Helper {
         return locationName.trim();
     }
 
-    public static void updateWidget(Context context, boolean keepValues) {
+    public static void updateSmallWidget(Context context) {
 
-        SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
-
-        if (keepValues) {
-            SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, true);
-            editor.apply();
-        }
+        SharedPreferences mSharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putBoolean(PREF_KEY_KEEP_VALUES, true);
+        editor.apply();
 
         Intent intent = new Intent(context, ChillWidgetProvider.class);
         intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
@@ -63,14 +61,12 @@ public final class Helper {
         context.sendBroadcast(intent);
     }
 
-    public static void updateBigWidget(Context context, boolean keepValues) {
+    public static void updateBigWidget(Context context) {
 
-        SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
-
-        if (keepValues) {
-            SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_BIG_KEEP_VALUES, true);
-            editor.apply();
-        }
+        SharedPreferences mSharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putBoolean(PREF_KEY_BIG_KEEP_VALUES, true);
+        editor.apply();
 
         Intent intent = new Intent(context, BigChillWidgetProvider.class);
         intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");

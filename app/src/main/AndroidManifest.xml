@@ -76,7 +76,7 @@
             android:theme="@style/SettingsTheme">
         </activity>
 
-        <receiver android:name=".service.ChillWidgetProvider">
+        <receiver android:name=".receiver.ChillWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action android:name="android.appwidget.action.APPWIDGET_DELETED"/>
@@ -91,7 +91,7 @@
                 android:resource="@xml/chill_weather_widget_info"/>
         </receiver>
 
-        <receiver android:name=".service.BigChillWidgetProvider">
+        <receiver android:name=".receiver.BigChillWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action android:name="android.appwidget.action.APPWIDGET_DELETED"/>
@@ -100,7 +100,14 @@
                 <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE"/>
                 <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON"/>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.TIME_TICK"/>
+            </intent-filter>
+            <intent-filter
+                android:enabled="true"
+                android:exported="true">
+                <action android:name="android.intent.action.TIME_TICK" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED"/>
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
