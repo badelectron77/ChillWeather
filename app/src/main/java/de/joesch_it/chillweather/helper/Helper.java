@@ -27,6 +27,7 @@ import de.joesch_it.chillweather.ui.BigChillWidgetProvider;
 import de.joesch_it.chillweather.ui.ChillWidgetProvider;
 
 import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
 
@@ -62,7 +63,23 @@ public final class Helper {
         context.sendBroadcast(intent);
     }
 
-    public static void updateBigWidget() {
+    public static void updateBigWidget(Context context, boolean keepValues) {
+
+        SharedPreferences sharedPref = context.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+
+        if (keepValues) {
+            SharedPreferences.Editor editor = sharedPref.edit().putBoolean(PREF_KEY_BIG_KEEP_VALUES, true);
+            editor.apply();
+        }
+
+        Intent intent = new Intent(context, BigChillWidgetProvider.class);
+        intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
+        int ids[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, BigChillWidgetProvider.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        context.sendBroadcast(intent);
+    }
+
+    public static void updateBigWidgetClock() {
 
         Context context = App.getContext();
         Intent intent = new Intent(context, BigChillWidgetProvider.class);

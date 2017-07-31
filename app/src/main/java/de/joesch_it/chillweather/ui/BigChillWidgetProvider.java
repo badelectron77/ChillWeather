@@ -75,7 +75,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_WIDGET_REFRESH_TIME;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
-import static de.joesch_it.chillweather.helper.Helper.updateBigWidget;
+import static de.joesch_it.chillweather.helper.Helper.updateBigWidgetClock;
 
 public class BigChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
@@ -100,7 +100,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        Log.v(TAG, "onReceive()");
+        //Log.v(TAG, "onReceive()");
 
         if (intent.getAction().equals(BIG_CHILL_WIDGET_UPDATE)
                 || intent.getAction().equals(BOOT_COMPLETED)
@@ -198,9 +198,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             // update every second
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(System.currentTimeMillis());
-                alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), 60 * 1000, getBigChillWidgetUpdateIntent());
+                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60 * 1000, getBigChillWidgetUpdateIntent());
                 // DEBUG: Minutes instead of hours
                 //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getBigChillWidgetUpdateIntent());
             } else {
@@ -210,7 +208,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                 @Override
                 public void onReceive(Context ctx, Intent intent) {
                     if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                        updateBigWidget();
+                        updateBigWidgetClock();
                     }
                 }
             };
@@ -230,7 +228,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         updateViews.setTextViewText(R.id.bigWidgetClockLabel, getFormattedMinuteTimeForBigWidget());
 
         boolean keepValues = mSharedPref.getBoolean(PREF_KEY_BIG_KEEP_VALUES, false);
-        Log.v(TAG, String.valueOf(keepValues));
+        //Log.v(TAG, String.valueOf(keepValues));
 
         if (mSharedPref.getBoolean(PREF_KEY_BIG_SHOW_LOADING, true)) {
             showLoading(updateViews);
@@ -339,7 +337,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
     //<editor-fold desc="getForecast">
     private void getForecast(final AppWidgetManager appWidgetManager, final RemoteViews updateViews, final int appWidgetId) {
-        Log.v(TAG, "getForecast");
+        //Log.v(TAG, "getForecast");
 
         String DARKSKY_API_KEY = mContext.getString(R.string.darksky_api_key);
 

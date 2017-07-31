@@ -31,6 +31,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_SWITCH;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_COLORED_ICONS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_WIDGET_TRANSPARENCY;
+import static de.joesch_it.chillweather.helper.Helper.updateBigWidget;
 import static de.joesch_it.chillweather.helper.Helper.updateWidget;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
@@ -75,6 +76,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     editor.putString(PREF_KEY_AUTOREFRESH_FREQUENCY, stringValue);
                     editor.apply();
                     updateWidget(context, true); // only AlarmManager refresh
+                    updateBigWidget(context, true); // only AlarmManager refresh
                 }
 
                 // Widget transparency
@@ -84,6 +86,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     editor.putString(PREF_KEY_WIDGET_TRANSPARENCY, stringValue);
                     editor.apply();
                     updateWidget(context, true); // design & AlarmManager refresh
+                    updateBigWidget(context, true); // design & AlarmManager refresh
                 }
 
                 // Set the summary to reflect the new value.
@@ -116,12 +119,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 editor.putBoolean(PREF_KEY_COLORED_ICONS, actualColoredIconsSwitch);
                 editor.apply();
                 updateWidget(context, true); // design & AlarmManager refresh
+                updateBigWidget(context, true); // design & AlarmManager refresh
             }
 
             if (sharedPref.getBoolean(PREF_KEY_AUTOREFRESH_SWITCH, true) != actualAutoRefreshSwitch) {
                 editor.putBoolean(PREF_KEY_AUTOREFRESH_SWITCH, actualAutoRefreshSwitch);
                 editor.apply();
                 updateWidget(context, true); // only AlarmManager refresh
+                updateBigWidget(context, true); // only AlarmManager refresh
             }
 
             return false;
