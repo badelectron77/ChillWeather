@@ -94,7 +94,6 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     private double mLastLocationLongitude = DEFAULT_LOCATION_LONGITUDE;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private BroadcastReceiver receiver;
     //</editor-fold>
 
     //<editor-fold desc="AppWidgetProvider">
@@ -103,9 +102,16 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         super.onReceive(context, intent);
         //Log.v(TAG, "onReceive() in groß");
 
-        if (intent.getAction().equals(BIG_CHILL_WIDGET_UPDATE)
-                || intent.getAction().equals(BOOT_COMPLETED)
-                || intent.getAction().equals(BIG_CHILL_WIDGET_BUTTON)) {
+        String action = intent.getAction();
+
+        if (action.equals(BIG_CHILL_WIDGET_UPDATE)
+                || action.equals(BOOT_COMPLETED)
+                || action.equals(BIG_CHILL_WIDGET_BUTTON)
+                || action.equals(Intent.ACTION_TIME_TICK)
+                || action.equals(Intent.ACTION_TIME_CHANGED)
+                || action.equals(Intent.ACTION_TIMEZONE_CHANGED)
+                || action.equals(Intent.ACTION_DATE_CHANGED)
+                ) {
 
             SharedPreferences.Editor editor = mSharedPref.edit();
             boolean keepValues = true;
@@ -173,9 +179,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
         editor.apply();
 
-        if (receiver != null) {
-            context.getApplicationContext().unregisterReceiver(receiver);
-        }
+        context.getApplicationContext().unregisterReceiver(this);
     }
 
     @Override
@@ -205,19 +209,10 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             } else {
                 alarmManager.cancel(getBigChillWidgetUpdateIntent());
             }
-            receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context ctx, Intent intent) {
-                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0
-                            || intent.getAction().compareTo(Intent.ACTION_TIME_CHANGED) == 0
-                            || intent.getAction().compareTo(Intent.ACTION_TIMEZONE_CHANGED) == 0
-                            || intent.getAction().compareTo(Intent.ACTION_DATE_CHANGED) == 0
-                            ) {
-                        updateBigWidgetClock();
-                    }
-                }
-            };
-            context.getApplicationContext().registerReceiver(receiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_TICK));
+            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_CHANGED));
+            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
+            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_DATE_CHANGED));
 
             updateBigChillWidget(context, appWidgetManager, appWidgetId, views);
         }
