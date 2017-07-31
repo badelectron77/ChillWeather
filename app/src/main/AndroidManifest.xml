@@ -76,7 +76,7 @@
             android:theme="@style/SettingsTheme">
         </activity>
 
-        <receiver android:name=".ui.ChillWidgetProvider">
+        <receiver android:name=".service.ChillWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action android:name="android.appwidget.action.APPWIDGET_DELETED"/>
@@ -91,7 +91,7 @@
                 android:resource="@xml/chill_weather_widget_info"/>
         </receiver>
 
-        <receiver android:name=".ui.BigChillWidgetProvider">
+        <receiver android:name=".service.BigChillWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action android:name="android.appwidget.action.APPWIDGET_DELETED"/>

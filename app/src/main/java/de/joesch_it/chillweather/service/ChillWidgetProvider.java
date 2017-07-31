@@ -1,15 +1,12 @@
-package de.joesch_it.chillweather.ui;
-
+package de.joesch_it.chillweather.service;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
@@ -17,7 +14,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -42,14 +38,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
+import de.joesch_it.chillweather.ui.MainActivity;
 import de.joesch_it.chillweather.weather.Forecast;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.deserializer.CurrentDeserializer;
@@ -59,29 +54,27 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_BUTTON;
-import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE;
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
+import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_UPDATE2;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
 import static de.joesch_it.chillweather.helper.App.DISPLACEMENT_IN_METERS;
 import static de.joesch_it.chillweather.helper.App.FASTEST_UPDATE_INTERVAL_IN_MILLIS;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_ICON;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_LOCATION;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_TEMPERATURE;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_UPDATED;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_SHOW_LOADING;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_WIDGET_REFRESH_TIME;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_ICON;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_LOCATION;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_TEMPERATURE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_UPDATED;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
-import static de.joesch_it.chillweather.helper.Helper.updateBigWidgetClock;
+import static de.joesch_it.chillweather.helper.App.CHILL_WIDGET_BUTTON;
 
-public class BigChillWidgetProvider extends AppWidgetProvider
+public class ChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
-    public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
+    //public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
     private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
     private final Context mContext = App.getContext();
     protected Boolean mRequestingLocationUpdates;
@@ -93,7 +86,6 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     private double mLastLocationLongitude = DEFAULT_LOCATION_LONGITUDE;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private BroadcastReceiver receiver;
     //</editor-fold>
 
     //<editor-fold desc="AppWidgetProvider">
@@ -102,49 +94,31 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         super.onReceive(context, intent);
         //Log.v(TAG, "onReceive()");
 
-        if (intent.getAction().equals(BIG_CHILL_WIDGET_UPDATE)
+        if (intent.getAction().equals(CHILL_WIDGET_UPDATE2)
                 || intent.getAction().equals(BOOT_COMPLETED)
-                || intent.getAction().equals(BIG_CHILL_WIDGET_BUTTON)) {
+                || intent.getAction().equals(CHILL_WIDGET_BUTTON)) {
 
             SharedPreferences.Editor editor = mSharedPref.edit();
-            boolean keepValues = true;
 
-            boolean doRefresh = mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true);
-            int actualMaxDifferenceInHoursForRefresh = Integer.valueOf(mSharedPreferences.getString("autorefresh_frequency", "3"));
-            if (doRefresh) {
-                long nowTime = System.currentTimeMillis() / 1000L; // current time in seconds
-                long lastRefreshTime = mSharedPref.getLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
-                long maxDifferenceInSeconds = actualMaxDifferenceInHoursForRefresh * 3600L;
-                if (maxDifferenceInSeconds > 0 && nowTime - lastRefreshTime > maxDifferenceInSeconds) {
-                    // refresh weather data
-                    keepValues = false;
-                    editor.putLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
-                }
-            }
-
-            if (intent.getAction().equals(BIG_CHILL_WIDGET_BUTTON)
+            if (intent.getAction().equals(CHILL_WIDGET_BUTTON)
                     || intent.getAction().equals(BOOT_COMPLETED)) {
                 // show "loading" after boot completed or after widget refresh button clicked
-                editor.putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
-                keepValues = false;
+                editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
+                editor.apply();
             }
 
-            editor.putBoolean(PREF_KEY_BIG_KEEP_VALUES, keepValues);
-            editor.apply();
-
-            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            int appWidgetIds[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
-
-            for (int appWidgetID : appWidgetIds) {
+            ComponentName thisAppWidget = new ComponentName(mContext.getPackageName(), getClass().getName());
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
+            int ids[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
+            for (int appWidgetID : ids) {
                 RemoteViews views = new RemoteViews(context.getPackageName(), getResId());
-                updateBigChillWidget(context, appWidgetManager, appWidgetID, views);
+                updateChillWidget(mContext, appWidgetManager, appWidgetID, views);
             }
         }
     }
 
-    private PendingIntent getBigChillWidgetUpdateIntent() {
-        Intent intent = new Intent(BIG_CHILL_WIDGET_UPDATE);
+    private PendingIntent getChillWidgetUpdateIntent() {
+        Intent intent = new Intent(CHILL_WIDGET_UPDATE2);
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -154,7 +128,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         //Log.v(TAG, "onEnabled()");
 
         SharedPreferences.Editor editor = mSharedPref.edit();
-        editor.putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
+        editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
         editor.apply();
         //Log.v(TAG, "onEnabled()");
     }
@@ -169,12 +143,11 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             mGoogleApiClient.disconnect();
         }
 
-        SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
+        SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_SHOW_LOADING, true);
         editor.apply();
 
-        if (receiver != null) {
-            context.getApplicationContext().unregisterReceiver(receiver);
-        }
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(getChillWidgetUpdateIntent());
     }
 
     @Override
@@ -188,49 +161,39 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             // open MainActivity onClick on widget
             Intent openIntent = new Intent(context, MainActivity.class);
             PendingIntent openPendingIntent = PendingIntent.getActivity(context, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setOnClickPendingIntent(R.id.bigWidgetLayout, openPendingIntent);
+            views.setOnClickPendingIntent(R.id.widgetLayout, openPendingIntent);
 
             // onClick listener on refresh button
-            Intent refreshIntent = new Intent(BIG_CHILL_WIDGET_BUTTON);
+            Intent refreshIntent = new Intent(CHILL_WIDGET_BUTTON);
             PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setOnClickPendingIntent(R.id.bigWidgetRefreshButton, refreshPendingIntent);
+            views.setOnClickPendingIntent(R.id.widgetRefreshButton, refreshPendingIntent);
 
-            // update every second
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
-                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60 * 1000, getBigChillWidgetUpdateIntent());
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(System.currentTimeMillis());
+                int maxDifferenceInHours = Integer.valueOf(mSharedPreferences.getString("autorefresh_frequency", "3"));
+                calendar.add(Calendar.HOUR, maxDifferenceInHours);
+                alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 3600 * 1000, getChillWidgetUpdateIntent());
                 // DEBUG: Minutes instead of hours
-                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getBigChillWidgetUpdateIntent());
+                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getChillWidgetUpdateIntent());
             } else {
-                alarmManager.cancel(getBigChillWidgetUpdateIntent());
+                alarmManager.cancel(getChillWidgetUpdateIntent());
             }
-            receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context ctx, Intent intent) {
-                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                        updateBigWidgetClock();
-                    }
-                }
-            };
-            context.getApplicationContext().registerReceiver(receiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-            updateBigChillWidget(context, appWidgetManager, appWidgetId, views);
+            updateChillWidget(context, appWidgetManager, appWidgetId, views);
         }
     }
 
-    public void updateBigChillWidget(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, final RemoteViews updateViews) {
+    public void updateChillWidget(final Context context, final AppWidgetManager appWidgetManager, final int appWidgetId, final RemoteViews updateViews) {
         //Log.v(TAG, "updateChillWidget()");
 
         int transparency = Integer.valueOf(mSharedPreferences.getString("widget_transparency", "80"));
-        updateViews.setInt(R.id.bigWidgetLayout, "setBackgroundResource", Helper.getWidgetBackgroundDrawable(transparency));
+        updateViews.setInt(R.id.widgetLayout, "setBackgroundResource", Helper.getWidgetBackgroundDrawable(transparency));
 
-        // set the current time
-        updateViews.setTextViewText(R.id.bigWidgetClockLabel, getFormattedMinuteTimeForBigWidget());
+        boolean keepValues = mSharedPref.getBoolean(PREF_KEY_KEEP_VALUES, false);
 
-        boolean keepValues = mSharedPref.getBoolean(PREF_KEY_BIG_KEEP_VALUES, false);
-        //Log.v(TAG, String.valueOf(keepValues));
-
-        if (mSharedPref.getBoolean(PREF_KEY_BIG_SHOW_LOADING, true)) {
+        if (mSharedPref.getBoolean(PREF_KEY_SHOW_LOADING, true)) {
             showLoading(updateViews);
             if (!Helper.isNetworkAvailable(context)) {
                 // no network
@@ -240,7 +203,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                 handler.postDelayed(new Runnable() {
                     public void run() {
                         // show latest values after some seconds, if we have them
-                        if (!mSharedPref.getString(PREF_KEY_BIG_KEEP_TEMPERATURE, "").isEmpty()) {
+                        if(!mSharedPref.getString(PREF_KEY_KEEP_TEMPERATURE, "").isEmpty()) {
                             loadOldValues(context, updateViews);
                             appWidgetManager.updateAppWidget(appWidgetId, updateViews);
                         }
@@ -249,7 +212,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
             } else {
                 // network available
-                SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_BIG_SHOW_LOADING, false);
+                SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_SHOW_LOADING, false);
                 editor.apply();
             }
         }
@@ -269,75 +232,59 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         }
 
         if (keepValues) {
-            SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_BIG_KEEP_VALUES, false);
+            // only on orientation or design change
+            SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_KEEP_VALUES, false);
             editor.apply();
-
-            // load old weather values
             loadOldValues(context, updateViews);
         }
         appWidgetManager.updateAppWidget(appWidgetId, updateViews);
     }
 
-    public String getFormattedMinuteTimeForBigWidget() {
-
-        // default
-        String format = "H:mm"; // 5:28
-
-        //if (Helper.getCountryCode().equals(new Locale("de").getLanguage())) format = "H:mm"; // 17:28
-
-        SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.getDefault());
-        Calendar c = Calendar.getInstance();
-        formatter.setTimeZone(c.getTimeZone());
-        Date dateTime = new Date();
-        return formatter.format(dateTime);
-    }
-
     private void loadOldValues(Context context, RemoteViews updateViews) {
 
-        updateViews.setTextViewText(R.id.bigWidgetDateLabel, context.getString(R.string.updated) + " " + mSharedPref.getString(PREF_KEY_BIG_KEEP_UPDATED, context.getString(R.string.please_reload)));
-        updateViews.setTextViewText(R.id.bigWidgetTemperatureLabel, mSharedPref.getString(PREF_KEY_BIG_KEEP_TEMPERATURE, ""));
-        updateViews.setTextViewText(R.id.bigWidgetLocationLabel, mSharedPref.getString(PREF_KEY_BIG_KEEP_LOCATION, ""));
-        updateViews.setImageViewResource(R.id.bigWidgetIconImageView, Helper.getIconId(mSharedPref.getString(PREF_KEY_BIG_KEEP_ICON, "")));
+        updateViews.setTextViewText(R.id.widgetDateLabel, context.getString(R.string.updated) + " " + mSharedPref.getString(PREF_KEY_KEEP_UPDATED, context.getString(R.string.please_reload)));
+        updateViews.setTextViewText(R.id.widgetTemperatureLabel, mSharedPref.getString(PREF_KEY_KEEP_TEMPERATURE, ""));
+        updateViews.setTextViewText(R.id.widgetLocationLabel, mSharedPref.getString(PREF_KEY_KEEP_LOCATION, ""));
+        updateViews.setImageViewResource(R.id.widgetIconImageView, Helper.getIconId(mSharedPref.getString(PREF_KEY_KEEP_ICON, "")));
 
-        updateViews.setViewVisibility(R.id.bigWidgetTemperatureLabel, View.VISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetLocationLabel, View.VISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetIconImageView, View.VISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetLocationIconImageView, View.VISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetDateLabel, View.VISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetRefreshButton, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetTemperatureLabel, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLocationLabel, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetIconImageView, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLocationIconImageView, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetDateLabel, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetRefreshButton, View.VISIBLE);
 
-        updateViews.setViewVisibility(R.id.bigWidgetLoadingTextView, View.INVISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLoadingTextView, View.INVISIBLE);
     }
 
     private int getResId() {
-        int resId = R.layout.widget_chill_weather_big;
+        int resId = R.layout.widget_chill_weather;
         if (Helper.isTablet()) {
-            resId = R.layout.widget_chill_weather_big_tablet;
+            resId = R.layout.widget_chill_weather_tablet;
         }
         return resId;
     }
 
     private void showLoading(RemoteViews updateViews) {
-        updateViews.setViewVisibility(R.id.bigWidgetTemperatureLabel, View.INVISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetIconImageView, View.INVISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetLocationLabel, View.INVISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetLocationIconImageView, View.INVISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetDateLabel, View.INVISIBLE);
+        updateViews.setViewVisibility(R.id.widgetTemperatureLabel, View.INVISIBLE);
+        updateViews.setViewVisibility(R.id.widgetIconImageView, View.INVISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLocationLabel, View.INVISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLocationIconImageView, View.INVISIBLE);
+        updateViews.setViewVisibility(R.id.widgetDateLabel, View.INVISIBLE);
 
-        updateViews.setTextViewText(R.id.bigWidgetLoadingTextView, mContext.getString(R.string.loading));
-        updateViews.setViewVisibility(R.id.bigWidgetRefreshButton, View.VISIBLE);
-        updateViews.setViewVisibility(R.id.bigWidgetLoadingTextView, View.VISIBLE);
+        updateViews.setTextViewText(R.id.widgetLoadingTextView, mContext.getString(R.string.loading));
+        updateViews.setViewVisibility(R.id.widgetRefreshButton, View.VISIBLE);
+        updateViews.setViewVisibility(R.id.widgetLoadingTextView, View.VISIBLE);
     }
 
     private void showError(RemoteViews updateViews) {
         showLoading(updateViews);
-        updateViews.setTextViewText(R.id.bigWidgetLoadingTextView, mContext.getString(R.string.network_is_unavailable));
+        updateViews.setTextViewText(R.id.widgetLoadingTextView, mContext.getString(R.string.network_is_unavailable));
     }
     //</editor-fold>
 
     //<editor-fold desc="getForecast">
     private void getForecast(final AppWidgetManager appWidgetManager, final RemoteViews updateViews, final int appWidgetId) {
-        //Log.v(TAG, "getForecast");
 
         String DARKSKY_API_KEY = mContext.getString(R.string.darksky_api_key);
 
@@ -373,24 +320,24 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                             int iconId = Helper.getIconId(iconString);
 
                             SharedPreferences.Editor editor = mSharedPref.edit();
-                            editor.putBoolean(PREF_KEY_BIG_SHOW_LOADING, false);
-                            editor.putString(PREF_KEY_BIG_KEEP_TEMPERATURE, temperatureString);
-                            editor.putString(PREF_KEY_BIG_KEEP_ICON, iconString);
-                            editor.putString(PREF_KEY_BIG_KEEP_UPDATED, dateString);
+                            editor.putBoolean(PREF_KEY_SHOW_LOADING, false);
+                            editor.putString(PREF_KEY_KEEP_TEMPERATURE, temperatureString);
+                            editor.putString(PREF_KEY_KEEP_ICON, iconString);
+                            editor.putString(PREF_KEY_KEEP_UPDATED, dateString);
                             editor.apply();
 
-                            updateViews.setTextViewText(R.id.bigWidgetDateLabel, mContext.getString(R.string.updated) + " " + dateString);
-                            updateViews.setTextViewText(R.id.bigWidgetTemperatureLabel, temperatureString);
-                            updateViews.setImageViewResource(R.id.bigWidgetIconImageView, iconId);
+                            updateViews.setTextViewText(R.id.widgetDateLabel, mContext.getString(R.string.updated) + " " + dateString);
+                            updateViews.setTextViewText(R.id.widgetTemperatureLabel, temperatureString);
+                            updateViews.setImageViewResource(R.id.widgetIconImageView, iconId);
 
-                            updateViews.setViewVisibility(R.id.bigWidgetTemperatureLabel, View.VISIBLE);
-                            updateViews.setViewVisibility(R.id.bigWidgetIconImageView, View.VISIBLE);
-                            updateViews.setViewVisibility(R.id.bigWidgetDateLabel, View.VISIBLE);
-                            updateViews.setViewVisibility(R.id.bigWidgetRefreshButton, View.VISIBLE);
-                            updateViews.setViewVisibility(R.id.bigWidgetLocationLabel, View.VISIBLE);
-                            updateViews.setViewVisibility(R.id.bigWidgetLocationIconImageView, View.VISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetTemperatureLabel, View.VISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetIconImageView, View.VISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetDateLabel, View.VISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetRefreshButton, View.VISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetLocationLabel, View.VISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetLocationIconImageView, View.VISIBLE);
 
-                            updateViews.setViewVisibility(R.id.bigWidgetLoadingTextView, View.INVISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetLoadingTextView, View.INVISIBLE);
 
                             appWidgetManager.updateAppWidget(appWidgetId, updateViews);
 
@@ -447,8 +394,8 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                             }
 
                             SharedPreferences.Editor editor = mSharedPref.edit();
-                            editor.putBoolean(PREF_KEY_BIG_SHOW_LOADING, false);
-                            editor.putString(PREF_KEY_BIG_KEEP_LOCATION, locationName);
+                            editor.putBoolean(PREF_KEY_SHOW_LOADING, false);
+                            editor.putString(PREF_KEY_KEEP_LOCATION, locationName);
                             editor.apply();
 
                             int length = locationName.length();
@@ -459,9 +406,9 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                             if (length > maxL) {
                                 locationName = locationName.substring(0, Math.min(length, maxL)) + "...";
                             }
-                            updateViews.setTextViewText(R.id.bigWidgetLocationLabel, locationName);
-                            updateViews.setViewVisibility(R.id.bigWidgetLocationLabel, View.VISIBLE);
-                            updateViews.setViewVisibility(R.id.bigWidgetLocationIconImageView, View.VISIBLE);
+                            updateViews.setTextViewText(R.id.widgetLocationLabel, locationName);
+                            updateViews.setViewVisibility(R.id.widgetLocationLabel, View.VISIBLE);
+                            updateViews.setViewVisibility(R.id.widgetLocationIconImageView, View.VISIBLE);
                             appWidgetManager.updateAppWidget(appWidgetId, updateViews);
 
                         } catch (JSONException | NullPointerException e) {
@@ -536,7 +483,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                     case LocationSettingsStatusCodes.SUCCESS:
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         try {
-                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, BigChillWidgetProvider.this);
+                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, ChillWidgetProvider.this);
                         } catch (SecurityException e) {
                             //
                         }

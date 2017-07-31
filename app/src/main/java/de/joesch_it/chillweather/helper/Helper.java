@@ -23,8 +23,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import de.joesch_it.chillweather.R;
-import de.joesch_it.chillweather.ui.BigChillWidgetProvider;
-import de.joesch_it.chillweather.ui.ChillWidgetProvider;
+import de.joesch_it.chillweather.service.BigChillWidgetProvider;
+import de.joesch_it.chillweather.service.ChillWidgetProvider;
 
 import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
