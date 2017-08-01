@@ -1,9 +1,5 @@
-package de.joesch_it.chillweather.weather;
+package de.joesch_it.chillweather.weather.data;
 
-
-import de.joesch_it.chillweather.weather.data.Current;
-import de.joesch_it.chillweather.weather.data.Day;
-import de.joesch_it.chillweather.weather.data.Hour;
 
 public class Forecast {
 

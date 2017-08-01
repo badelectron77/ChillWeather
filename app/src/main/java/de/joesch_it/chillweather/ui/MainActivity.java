@@ -71,7 +71,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.Helper;
-import de.joesch_it.chillweather.weather.Forecast;
+import de.joesch_it.chillweather.weather.data.Forecast;
 import de.joesch_it.chillweather.weather.adapters.DayAdapter;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.data.Day;

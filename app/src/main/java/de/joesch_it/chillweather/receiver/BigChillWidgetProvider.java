@@ -5,7 +5,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +16,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -51,7 +49,7 @@ import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
 import de.joesch_it.chillweather.ui.MainActivity;
-import de.joesch_it.chillweather.weather.Forecast;
+import de.joesch_it.chillweather.weather.data.Forecast;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.deserializer.CurrentDeserializer;
 import okhttp3.Call;
@@ -76,7 +74,6 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_WIDGET_REFRESH_TIME;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
-import static de.joesch_it.chillweather.helper.Helper.updateBigWidgetClock;
 
 public class BigChillWidgetProvider extends AppWidgetProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
@@ -204,8 +201,6 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
                 alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60 * 1000, getBigChillWidgetUpdateIntent());
-                // DEBUG: Minutes instead of hours
-                //alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), maxDifferenceInHours * 60 * 1000, getBigChillWidgetUpdateIntent());
             } else {
                 alarmManager.cancel(getBigChillWidgetUpdateIntent());
             }

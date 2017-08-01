@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -46,7 +45,7 @@ import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
 import de.joesch_it.chillweather.ui.MainActivity;
-import de.joesch_it.chillweather.weather.Forecast;
+import de.joesch_it.chillweather.weather.data.Forecast;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.deserializer.CurrentDeserializer;
 import okhttp3.Call;
