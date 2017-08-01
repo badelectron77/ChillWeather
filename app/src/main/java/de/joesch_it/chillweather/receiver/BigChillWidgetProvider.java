@@ -1,6 +1,7 @@
 package de.joesch_it.chillweather.receiver;
 
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -58,6 +59,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_BUTTON;
+import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE2;
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
@@ -101,6 +103,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
         if (action.equals(BOOT_COMPLETED)
                 || action.equals(BIG_CHILL_WIDGET_BUTTON)
+                || action.equals(BIG_CHILL_WIDGET_UPDATE2)
                 || action.equals(Intent.ACTION_TIME_TICK)
                 || action.equals(Intent.ACTION_TIME_CHANGED)
                 || action.equals(Intent.ACTION_TIMEZONE_CHANGED)
@@ -149,6 +152,11 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         }
     }
 
+    private PendingIntent getBigChillWidgetUpdateIntent() {
+        Intent intent = new Intent(BIG_CHILL_WIDGET_UPDATE2);
+        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
@@ -173,6 +181,9 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
         editor.apply();
 
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(getBigChillWidgetUpdateIntent());
+
         context.getApplicationContext().unregisterReceiver(this);
     }
 
@@ -194,7 +205,13 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, 0, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.bigWidgetRefreshButton, refreshPendingIntent);
 
-            // update every minute
+            // update every minute in 2 ways
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
+                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, getBigChillWidgetUpdateIntent());
+            } else {
+                alarmManager.cancel(getBigChillWidgetUpdateIntent());
+            }
             context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_TICK));
             context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_CHANGED));
             context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));

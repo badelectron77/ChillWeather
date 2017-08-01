@@ -20,7 +20,7 @@ import static de.joesch_it.chillweather.helper.Helper.updateSmallWidget;
 
 public class App extends Application {
 
-    public static final String BUILD = "01.08.2017 9:10";
+    public static final String BUILD = "01.08.2017 11:17";
     public static final String STORE_URL = "https://play.google.com/store/apps/details?id=de.joesch_it.chillweather";
     //public static final String TAG = " ### " + App.class.getSimpleName() + " ###";
     public static final String POSITION_TOMORROW = "POSITION_TOMORROW";
@@ -52,6 +52,7 @@ public class App extends Application {
     public static final String PREF_KEY_BIG_KEEP_LOCATION = "PREF_KEY_BIG_KEEP_LOCATION";
     public static final String PREF_KEY_BIG_KEEP_UPDATED = "PREF_KEY_BIG_KEEP_UPDATED";
     public static final String BIG_CHILL_WIDGET_BUTTON = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON";
+    public static final String BIG_CHILL_WIDGET_UPDATE2 = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE2";
 
     public static final String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
     public static final int DISPLACEMENT_IN_METERS = 100;
