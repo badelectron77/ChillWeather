@@ -51,7 +51,6 @@ public class App extends Application {
     public static final String PREF_KEY_BIG_KEEP_ICON = "PREF_KEY_BIG_KEEP_ICON";
     public static final String PREF_KEY_BIG_KEEP_LOCATION = "PREF_KEY_BIG_KEEP_LOCATION";
     public static final String PREF_KEY_BIG_KEEP_UPDATED = "PREF_KEY_BIG_KEEP_UPDATED";
-    public static final String BIG_CHILL_WIDGET_UPDATE = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE";
     public static final String BIG_CHILL_WIDGET_BUTTON = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON";
 
     public static final String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";

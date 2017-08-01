@@ -26,7 +26,6 @@ import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.receiver.BigChillWidgetProvider;
 import de.joesch_it.chillweather.receiver.ChillWidgetProvider;
 
-import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;

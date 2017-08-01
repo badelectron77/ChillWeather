@@ -105,7 +105,6 @@
                 <action android:name="android.appwidget.action.APPWIDGET_DISABLED"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE"/>
                 <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON"/>
             </intent-filter>
             <intent-filter>

@@ -58,7 +58,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_BUTTON;
-import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE;
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
@@ -100,8 +99,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
         String action = intent.getAction();
 
-        if (action.equals(BIG_CHILL_WIDGET_UPDATE)
-                || action.equals(BOOT_COMPLETED)
+        if (action.equals(BOOT_COMPLETED)
                 || action.equals(BIG_CHILL_WIDGET_BUTTON)
                 || action.equals(Intent.ACTION_TIME_TICK)
                 || action.equals(Intent.ACTION_TIME_CHANGED)
