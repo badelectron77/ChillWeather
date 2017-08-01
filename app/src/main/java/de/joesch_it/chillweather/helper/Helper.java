@@ -75,16 +75,6 @@ public final class Helper {
         context.sendBroadcast(intent);
     }
 
-    public static void updateBigWidgetClock() {
-
-        Context context = App.getContext();
-        Intent intent = new Intent(context, BigChillWidgetProvider.class);
-        intent.setAction(BIG_CHILL_WIDGET_UPDATE);
-        int ids[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, BigChillWidgetProvider.class));
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        context.sendBroadcast(intent);
-    }
-
     public static boolean isNetworkAvailable(Context context) {
 
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
