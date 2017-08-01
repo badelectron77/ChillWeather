@@ -1,7 +1,6 @@
 package de.joesch_it.chillweather.receiver;
 
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -49,8 +48,8 @@ import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
 import de.joesch_it.chillweather.helper.Helper;
 import de.joesch_it.chillweather.ui.MainActivity;
-import de.joesch_it.chillweather.weather.data.Forecast;
 import de.joesch_it.chillweather.weather.data.Current;
+import de.joesch_it.chillweather.weather.data.Forecast;
 import de.joesch_it.chillweather.weather.deserializer.CurrentDeserializer;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -119,10 +118,15 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                 long nowTime = System.currentTimeMillis() / 1000L; // current time in seconds
                 long lastRefreshTime = mSharedPref.getLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
                 long maxDifferenceInSeconds = actualMaxDifferenceInHoursForRefresh * 3600L;
+
+                //Log.v(TAG, "maxDifferenceInSeconds " + maxDifferenceInSeconds);
+                //Log.v(TAG, "nowTime " + nowTime);
+                //Log.v(TAG, "lastRefreshTime " + lastRefreshTime);
+                //Log.v(TAG, "nowTime - lastRefreshTime " + String.valueOf(nowTime - lastRefreshTime));
+
                 if (maxDifferenceInSeconds > 0 && nowTime - lastRefreshTime > maxDifferenceInSeconds) {
                     // refresh weather data
                     keepValues = false;
-                    editor.putLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
                 }
             }
 
@@ -145,11 +149,6 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                 updateBigChillWidget(context, appWidgetManager, appWidgetID, views);
             }
         }
-    }
-
-    private PendingIntent getBigChillWidgetUpdateIntent() {
-        Intent intent = new Intent(BIG_CHILL_WIDGET_UPDATE);
-        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -198,12 +197,6 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             views.setOnClickPendingIntent(R.id.bigWidgetRefreshButton, refreshPendingIntent);
 
             // update every minute
-            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
-                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60 * 1000, getBigChillWidgetUpdateIntent());
-            } else {
-                alarmManager.cancel(getBigChillWidgetUpdateIntent());
-            }
             context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_TICK));
             context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_CHANGED));
             context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
@@ -249,6 +242,11 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         }
 
         if (Helper.isNetworkAvailable(context) && !keepValues) {
+
+            long nowTime = System.currentTimeMillis() / 1000L;
+            SharedPreferences.Editor editor = mSharedPref.edit();
+            editor.putLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
+            editor.apply();
 
             startLocationStuff();
 
