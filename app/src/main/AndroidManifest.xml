@@ -99,13 +99,33 @@
 
         <receiver android:name=".receiver.BigChillWidgetProvider">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="CLOCK_TICK" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="JOB_CLOCK_TICK" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.DATE_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_DREAMING_STOPPED" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_DELETED"/>
                 <action android:name="android.appwidget.action.APPWIDGET_ENABLED"/>
                 <action android:name="android.appwidget.action.APPWIDGET_DISABLED"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE2"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON"/>
@@ -113,16 +133,18 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.TIME_TICK" />
-                <action android:name="android.intent.action.TIME_SET" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-                <action android:name="android.intent.action.DATE_CHANGED"/>
-            </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/chill_weather_widget_big_info2"/>
         </receiver>
+
+        <service
+            android:name=".service.BigWidgetRepeatingJob"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"/>
+
+        <service android:name=".service.BigWidgetBackgroundService" />
+
 
     </application>
 

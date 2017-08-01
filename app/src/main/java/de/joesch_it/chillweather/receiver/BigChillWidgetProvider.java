@@ -1,16 +1,18 @@
 package de.joesch_it.chillweather.receiver;
 
 
-import android.app.AlarmManager;
+import android.annotation.TargetApi;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -47,7 +49,10 @@ import java.util.Locale;
 
 import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.App;
+import de.joesch_it.chillweather.helper.BigWidgetAlarm;
 import de.joesch_it.chillweather.helper.Helper;
+import de.joesch_it.chillweather.service.BigWidgetBackgroundService;
+import de.joesch_it.chillweather.service.BigWidgetRepeatingJob;
 import de.joesch_it.chillweather.ui.MainActivity;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.data.Forecast;
@@ -59,7 +64,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_BUTTON;
-import static de.joesch_it.chillweather.helper.App.BIG_CHILL_WIDGET_UPDATE2;
 import static de.joesch_it.chillweather.helper.App.BOOT_COMPLETED;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
@@ -81,6 +85,8 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     //<editor-fold desc="Fields">
     public static final String TAG = " ### " + BigChillWidgetProvider.class.getSimpleName() + " ###";
     private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
+    public static final String ACTION_TICK = "CLOCK_TICK";
+    public static final String JOB_TICK = "JOB_CLOCK_TICK";
     private final Context mContext = App.getContext();
     protected Boolean mRequestingLocationUpdates;
     protected Location mCurrentLocation;
@@ -102,9 +108,10 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         String action = intent.getAction();
 
         if (action.equals(BOOT_COMPLETED)
+                || action.equals(JOB_TICK)
+                || action.equals(ACTION_TICK)
+                || action.equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
                 || action.equals(BIG_CHILL_WIDGET_BUTTON)
-                || action.equals(BIG_CHILL_WIDGET_UPDATE2)
-                || action.equals(Intent.ACTION_TIME_TICK)
                 || action.equals(Intent.ACTION_TIME_CHANGED)
                 || action.equals(Intent.ACTION_TIMEZONE_CHANGED)
                 || action.equals(Intent.ACTION_DATE_CHANGED)
@@ -119,12 +126,10 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                 long nowTime = System.currentTimeMillis() / 1000L; // current time in seconds
                 long lastRefreshTime = mSharedPref.getLong(PREF_KEY_BIG_WIDGET_REFRESH_TIME, nowTime);
                 long maxDifferenceInSeconds = actualMaxDifferenceInHoursForRefresh * 3600L;
-
                 //Log.v(TAG, "maxDifferenceInSeconds " + maxDifferenceInSeconds);
                 //Log.v(TAG, "nowTime " + nowTime);
                 //Log.v(TAG, "lastRefreshTime " + lastRefreshTime);
                 //Log.v(TAG, "nowTime - lastRefreshTime " + String.valueOf(nowTime - lastRefreshTime));
-
                 if (maxDifferenceInSeconds > 0 && nowTime - lastRefreshTime > maxDifferenceInSeconds) {
                     // refresh weather data
                     keepValues = false;
@@ -144,18 +149,43 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             ComponentName thisAppWidget = new ComponentName(context.getPackageName(), getClass().getName());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int appWidgetIds[] = appWidgetManager.getAppWidgetIds(thisAppWidget);
-
+            //onUpdate(context, appWidgetManager, appWidgetIds);
             for (int appWidgetID : appWidgetIds) {
                 RemoteViews views = new RemoteViews(context.getPackageName(), getResId());
+                restartAll(context);
                 updateBigChillWidget(context, appWidgetManager, appWidgetID, views);
             }
         }
     }
 
-    private PendingIntent getBigChillWidgetUpdateIntent() {
-        Intent intent = new Intent(BIG_CHILL_WIDGET_UPDATE2);
-        return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    private void restartAll(Context context){
+        //Log.v(TAG, "restartAll()");
+        Intent serviceBG = new Intent(context.getApplicationContext(), BigWidgetBackgroundService.class);
+        context.getApplicationContext().startService(serviceBG);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            scheduleJob(context);
+        } else {
+            BigWidgetAlarm appWidgetAlarm = new BigWidgetAlarm(context.getApplicationContext());
+            appWidgetAlarm.startAlarm();
+        }
     }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void scheduleJob(Context context) {
+        ComponentName serviceComponent = new ComponentName(context.getPackageName(), BigWidgetRepeatingJob.class.getName());
+        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+        builder.setPersisted(true);
+        builder.setPeriodic(600000);
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(builder.build());
+        //int jobResult = jobScheduler.schedule(builder.build());
+        //if (jobResult == JobScheduler.RESULT_SUCCESS){}
+    }
+
+    //private PendingIntent getBigChillWidgetUpdateIntent() {
+    //    Intent intent = new Intent(BIG_CHILL_WIDGET_UPDATE2);
+    //    return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    //}
 
     @Override
     public void onEnabled(Context context) {
@@ -166,6 +196,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         editor.putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
         editor.apply();
         //Log.v(TAG, "onEnabled()");
+        restartAll(context);
     }
 
     @Override
@@ -181,10 +212,22 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         SharedPreferences.Editor editor = mSharedPref.edit().putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
         editor.apply();
 
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(getBigChillWidgetUpdateIntent());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            jobScheduler.cancelAll();
+        } else {
+            // stop alarm
+            BigWidgetAlarm appWidgetAlarm = new BigWidgetAlarm(context.getApplicationContext());
+            appWidgetAlarm.stopAlarm();
+        }
+        Intent serviceBG = new Intent(context.getApplicationContext(), BigWidgetBackgroundService.class);
+        serviceBG.putExtra("SHUTDOWN", true);
+        context.getApplicationContext().startService(serviceBG);
+        context.getApplicationContext().stopService(serviceBG);
 
-        context.getApplicationContext().unregisterReceiver(this);
+        //AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        //alarmManager.cancel(getBigChillWidgetUpdateIntent());
+        //context.getApplicationContext().unregisterReceiver(this);
     }
 
     @Override
@@ -206,17 +249,18 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             views.setOnClickPendingIntent(R.id.bigWidgetRefreshButton, refreshPendingIntent);
 
             // update every minute in 2 ways
-            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
-                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, getBigChillWidgetUpdateIntent());
-            } else {
-                alarmManager.cancel(getBigChillWidgetUpdateIntent());
-            }
-            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_TICK));
-            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_CHANGED));
-            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
-            context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_DATE_CHANGED));
+            //AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            //if (mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true)) {
+            //    alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, getBigChillWidgetUpdateIntent());
+            //} else {
+            //    alarmManager.cancel(getBigChillWidgetUpdateIntent());
+            //}
+            //context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_TICK));
+            //context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIME_CHANGED));
+            //context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED));
+            //context.getApplicationContext().registerReceiver(this, new IntentFilter(Intent.ACTION_DATE_CHANGED));
 
+            restartAll(context);
             updateBigChillWidget(context, appWidgetManager, appWidgetId, views);
         }
     }
