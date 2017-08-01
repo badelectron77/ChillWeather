@@ -196,7 +196,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
         editor.putBoolean(PREF_KEY_BIG_SHOW_LOADING, true);
         editor.apply();
         //Log.v(TAG, "onEnabled()");
-        restartAll(context);
+        //restartAll(context);
     }
 
     @Override

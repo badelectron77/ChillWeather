@@ -13,7 +13,7 @@ import de.joesch_it.chillweather.receiver.BigChillWidgetProvider;
 
 public class BigWidgetBackgroundService extends Service {
 
-    private static final String TAG = "### WidgetBackground";
+    private static final String TAG = " ### " + BigWidgetBackgroundService.class.getSimpleName() + " ###";
     private static BroadcastReceiver mMinuteTickReceiver;
 
     @Override
