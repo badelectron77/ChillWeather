@@ -99,16 +99,15 @@ public class ChillWidgetProvider extends AppWidgetProvider
                 || intent.getAction().equals(CHILL_WIDGET_BUTTON)) {
 
             SharedPreferences.Editor editor = mSharedPref.edit();
-            boolean keepValues = true;
 
             if (intent.getAction().equals(CHILL_WIDGET_BUTTON)
                     || intent.getAction().equals(BOOT_COMPLETED)) {
                 // show "loading" after boot completed or after widget refresh button clicked
                 editor.putBoolean(PREF_KEY_SHOW_LOADING, true);
-                keepValues = false;
+                //keepValues = false;
             }
 
-            editor.putBoolean(PREF_KEY_KEEP_VALUES, keepValues);
+            editor.putBoolean(PREF_KEY_KEEP_VALUES, false);
             editor.apply();
 
             ComponentName thisAppWidget = new ComponentName(mContext.getPackageName(), getClass().getName());
