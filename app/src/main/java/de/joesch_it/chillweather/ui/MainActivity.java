@@ -518,7 +518,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     protected void startLocationUpdates() {
-        Log.i(TAG, "startLocationUpdates()");
+        //Log.i(TAG, "startLocationUpdates()");
 
         if (!mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -940,7 +940,7 @@ public class MainActivity extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.no_location_detected)
                 .setMessage(R.string.location_enabled)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.location_settings, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent viewIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(viewIntent);

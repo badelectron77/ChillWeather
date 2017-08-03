@@ -119,7 +119,9 @@
     <string name="rate_this_app">App bewerten</string>
     <string name="please_reload">Bitte neu laden!</string>
     <string name="use_gps">Nutze GPS</string>
-    <string name="location_enabled">Bitte stellen Sie sicher, dass der Standort auf Ihrem Gerät eingeschaltet ist.</string>
-    <string name="no_location_detected">Kein Standort gefunden</string>
+    <string name="location_enabled">Diese App benötigt Ihren ungefähren netzwerkbasierten Standort, kein GPS.
+        Auf Ihrem Gerät ist der Standort deaktiviert.</string>
+    <string name="no_location_detected">Keinen Standort gefunden</string>
+    <string name="location_settings">Einstellungen</string>
 
 </resources>
