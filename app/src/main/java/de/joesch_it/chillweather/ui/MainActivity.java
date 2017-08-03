@@ -95,6 +95,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_FREQUENC
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_SWITCH;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_COLORED_ICONS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_USE_GPS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_WIDGET_TRANSPARENCY;
 import static de.joesch_it.chillweather.helper.App.STORE_URL;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
@@ -171,6 +172,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mTempColoredBackgrounds;
     private String mAppTheme;
     private boolean mTempPhotoBackground;
+    private int mLocationRequestPriority;
     //</editor-fold>
 
     @Override
@@ -210,6 +212,15 @@ public class MainActivity extends AppCompatActivity
         gsonBuilder.registerTypeAdapter(Hour[].class, new HourDeserializer());
         mGson = gsonBuilder.create();
         mSentJsonAlert = false;
+        SharedPreferences sharedPref = getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        if(sharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
+            // use GPS
+            mLocationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+        } else {
+            // no GPS
+            mLocationRequestPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+        }
         mRequestingLocationUpdates = true;
         updateValuesFromBundle(savedInstanceState);
         if (playServicesAvailable()) {
@@ -224,8 +235,6 @@ public class MainActivity extends AppCompatActivity
         mDailyListRecyclerView.setAdapter(mAdapter);
 
         // setting actual values to hidden preferences
-        SharedPreferences sharedPref = getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(PREF_KEY_COLORED_ICONS, mSharedPreferences.getBoolean("colored_icons_switch", true));
         editor.putBoolean(PREF_KEY_AUTOREFRESH_SWITCH, mSharedPreferences.getBoolean("pref_autorefresh_weather_switch", true));
         editor.putString(PREF_KEY_AUTOREFRESH_FREQUENCY, mSharedPreferences.getString("autorefresh_frequency", "3"));
@@ -472,11 +481,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     protected void createLocationRequest() {
+
         if (mLocationRequest == null) {
             mLocationRequest = new LocationRequest();
             mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLIS);
             mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLIS);
-            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mLocationRequest.setPriority(mLocationRequestPriority);
             mLocationRequest.setSmallestDisplacement(DISPLACEMENT_IN_METERS);
         }
     }
@@ -749,6 +759,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_options_menu, menu);
+
+        SharedPreferences mSharedPref = this.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+        menu.findItem(R.id.use_gps).setChecked(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false));
         return true;
     }
 
@@ -772,6 +785,28 @@ public class MainActivity extends AppCompatActivity
                     // we have no Forecast instance
                     getForecast();
                 }
+                break;
+            case R.id.use_gps:
+                SharedPreferences mSharedPref = this.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = mSharedPref.edit();
+                if(item.isChecked()) {
+                    // no GPS
+                    editor.putBoolean(PREF_KEY_USE_GPS, false);
+                    item.setChecked(false);
+                    mLocationRequestPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+                } else {
+                    // with GPS
+                    editor.putBoolean(PREF_KEY_USE_GPS, true);
+                    item.setChecked(true);
+                    mLocationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+                }
+                editor.apply();
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        System.exit(0);
+                    }
+                }, 200);
                 break;
             case R.id.settings:
                 Intent intentSettings = new Intent(this, SettingsActivity.class);

@@ -135,5 +135,6 @@
     <string name="pref_header_widgets">Widget</string>
     <string name="rate_this_app">Rate this app</string>
     <string name="please_reload">Please reload!</string>
+    <string name="use_gps">Use GPS</string>
 
 </resources>

@@ -77,6 +77,7 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_WIDGET_REFRESH_TIME;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_USE_GPS;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
 
 public class BigChillWidgetProvider extends AppWidgetProvider
@@ -97,6 +98,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     private double mLastLocationLongitude = DEFAULT_LOCATION_LONGITUDE;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private int mLocationRequestPriority;
     //</editor-fold>
 
     //<editor-fold desc="AppWidgetProvider">
@@ -540,6 +542,15 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
     //<editor-fold desc="Location">
     private void startLocationStuff() {
+
+        if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
+            // use GPS
+            mLocationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+        } else {
+            // no GPS
+            mLocationRequestPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+        }
+
         mRequestingLocationUpdates = true;
         if (playServicesAvailable()) {
             buildGoogleApiClient();
@@ -573,7 +584,7 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             mLocationRequest = new LocationRequest();
             mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLIS);
             mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLIS);
-            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mLocationRequest.setPriority(mLocationRequestPriority);
             mLocationRequest.setSmallestDisplacement(DISPLACEMENT_IN_METERS);
         }
     }

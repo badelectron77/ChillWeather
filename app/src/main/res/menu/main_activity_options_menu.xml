@@ -20,6 +20,11 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/use_gps"
+        android:checkable="true"
+        android:title="@string/use_gps"/>
+
+    <item
         android:id="@+id/about"
         android:title="@string/pref_header_about"
         app:showAsAction="never"/>

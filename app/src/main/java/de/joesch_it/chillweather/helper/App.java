@@ -31,6 +31,7 @@ public class App extends Application {
     public static final String PREF_KEY_AUTOREFRESH_SWITCH = "PREF_KEY_AUTOREFRESH_SWITCH";
     public static final String PREF_KEY_AUTOREFRESH_FREQUENCY = "PREF_KEY_AUTOREFRESH_FREQUENCY";
     public static final String PREF_KEY_APP_THEME = "PREF_KEY_APP_THEME";
+    public static final String PREF_KEY_USE_GPS = "PREF_KEY_USE_GPS";
 
     // small widget
     public static final String PREF_KEY_WIDGET_TRANSPARENCY = "PREF_KEY_WIDGET_TRANSPARENCY";
@@ -52,7 +53,6 @@ public class App extends Application {
     public static final String PREF_KEY_BIG_KEEP_LOCATION = "PREF_KEY_BIG_KEEP_LOCATION";
     public static final String PREF_KEY_BIG_KEEP_UPDATED = "PREF_KEY_BIG_KEEP_UPDATED";
     public static final String BIG_CHILL_WIDGET_BUTTON = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_BUTTON";
-    public static final String BIG_CHILL_WIDGET_UPDATE2 = "de.joesch_it.chillweather.BIG_CHILL_WIDGET_UPDATE2";
 
     public static final String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
     public static final int DISPLACEMENT_IN_METERS = 100;

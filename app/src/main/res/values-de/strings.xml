@@ -118,5 +118,6 @@
     <string name="pref_header_widgets">Widget</string>
     <string name="rate_this_app">App bewerten</string>
     <string name="please_reload">Bitte neu laden!</string>
+    <string name="use_gps">Nutze GPS</string>
 
 </resources>
