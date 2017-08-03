@@ -136,7 +136,7 @@
     <string name="rate_this_app">Rate this app</string>
     <string name="please_reload">Please reload!</string>
     <string name="use_gps">Use GPS</string>
-    <string name="location_enabled">No location detected. Make sure location is enabled on the device.</string>
+    <string name="location_enabled">Make sure location is enabled on the device.</string>
     <string name="no_location_detected">No location detected</string>
 
 </resources>

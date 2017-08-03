@@ -52,7 +52,7 @@ public final class Helper {
     public static int getLocationRequestPriority() {
         SharedPreferences mSharedPref = App.getContext().getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
         int locationRequestPriority;
-        if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, true)) {
+        if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
             // use GPS
             locationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
         } else {

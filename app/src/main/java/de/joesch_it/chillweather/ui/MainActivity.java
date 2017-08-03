@@ -5,6 +5,8 @@ import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.StateListAnimator;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -223,7 +225,7 @@ public class MainActivity extends AppCompatActivity
         if (playServicesAvailable()) {
             buildGoogleApiClient();
             createLocationRequest();
-            if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, true)) {
+            if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
                 buildLocationSettingsRequest();
             }
         }
@@ -518,7 +520,7 @@ public class MainActivity extends AppCompatActivity
     protected void startLocationUpdates() {
         Log.i(TAG, "startLocationUpdates()");
 
-        if (!mSharedPref.getBoolean(PREF_KEY_USE_GPS, true)) {
+        if (!mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
@@ -773,7 +775,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_options_menu, menu);
 
-        menu.findItem(R.id.use_gps).setChecked(mSharedPref.getBoolean(PREF_KEY_USE_GPS, true));
+        menu.findItem(R.id.use_gps).setChecked(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false));
         return true;
     }
 
@@ -810,12 +812,7 @@ public class MainActivity extends AppCompatActivity
                     item.setChecked(true);
                 }
                 editor.apply();
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        System.exit(0);
-                    }
-                }, 200);
+                restartApp();
                 break;
             case R.id.settings:
                 Intent intentSettings = new Intent(this, SettingsActivity.class);
@@ -833,6 +830,20 @@ public class MainActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void restartApp() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                Intent mStartActivity = new Intent(getApplicationContext(), MainActivity.class);
+                int mPendingIntentId = 123456;
+                PendingIntent mPendingIntent = PendingIntent.getActivity(getApplicationContext(), mPendingIntentId,    mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+                AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+                System.exit(0);
+            }
+        }, 100);
     }
     //</editor-fold>
 
