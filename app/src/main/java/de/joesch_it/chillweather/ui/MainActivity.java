@@ -1,6 +1,7 @@
 package de.joesch_it.chillweather.ui;
 
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.StateListAnimator;
 import android.app.Activity;
@@ -9,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -18,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -33,6 +36,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -105,7 +109,7 @@ public class MainActivity extends AppCompatActivity
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     //<editor-fold desc="Fields">
-    //public static final String TAG = " ### " + MainActivity.class.getSimpleName() + " ###";
+    public static final String TAG = " ### " + MainActivity.class.getSimpleName() + " ###";
     protected static final int STATUS_GETTING_WEATHER = 200;
     protected static final int STATUS_SHOW_WEATHER = 201;
     protected static final int STATUS_NO_NETWORK = 202;
@@ -153,6 +157,7 @@ public class MainActivity extends AppCompatActivity
     LinearLayout mhumidityRainLinearLayout;
     @BindView(R.id.swipeRefreshLayout)
     SwipeRefreshLayout mSwipeRefreshLayout;
+    private SharedPreferences mSharedPref;
     private String GOOGLE_GEOCODING_API_KEY;
     private String DARKSKY_API_KEY;
     private boolean mSentJsonAlert;
@@ -172,7 +177,6 @@ public class MainActivity extends AppCompatActivity
     private boolean mTempColoredBackgrounds;
     private String mAppTheme;
     private boolean mTempPhotoBackground;
-    private int mLocationRequestPriority;
     //</editor-fold>
 
     @Override
@@ -212,21 +216,16 @@ public class MainActivity extends AppCompatActivity
         gsonBuilder.registerTypeAdapter(Hour[].class, new HourDeserializer());
         mGson = gsonBuilder.create();
         mSentJsonAlert = false;
-        SharedPreferences sharedPref = getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        if(sharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
-            // use GPS
-            mLocationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
-        } else {
-            // no GPS
-            mLocationRequestPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
-        }
+        mSharedPref = getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSharedPref.edit();
         mRequestingLocationUpdates = true;
         updateValuesFromBundle(savedInstanceState);
         if (playServicesAvailable()) {
             buildGoogleApiClient();
             createLocationRequest();
-            buildLocationSettingsRequest();
+            if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, true)) {
+                buildLocationSettingsRequest();
+            }
         }
         mAdapter = new DayAdapter(mDayList);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -269,7 +268,7 @@ public class MainActivity extends AppCompatActivity
         mMenuRefreshClicked = false;
         mRefreshSwiped = false;
 
-        if(mSharedPreferences.getString("app_theme", "2").equals("2")) {
+        if (mSharedPreferences.getString("app_theme", "2").equals("2")) {
             makeToolBarTransparent();
         }
 
@@ -435,8 +434,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         // reset variables
-        if(mMenuRefreshClicked) mMenuRefreshClicked = false;
-        if(mRefreshSwiped) mRefreshSwiped = false;
+        if (mMenuRefreshClicked) mMenuRefreshClicked = false;
+        if (mRefreshSwiped) mRefreshSwiped = false;
     }
 
     private Forecast parseForecastDetails(String jsonData) throws JSONException {
@@ -481,12 +480,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     protected void createLocationRequest() {
-
         if (mLocationRequest == null) {
             mLocationRequest = new LocationRequest();
             mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLIS);
             mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLIS);
-            mLocationRequest.setPriority(mLocationRequestPriority);
+            mLocationRequest.setPriority(Helper.getLocationRequestPriority());
             mLocationRequest.setSmallestDisplacement(DISPLACEMENT_IN_METERS);
         }
     }
@@ -499,6 +497,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         switch (requestCode) {
             // Check for the integer request code originally supplied to startResolutionForResult().
             case REQUEST_CHECK_SETTINGS:
@@ -517,50 +516,59 @@ public class MainActivity extends AppCompatActivity
     }
 
     protected void startLocationUpdates() {
-        LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequest).setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
-                final Status status = locationSettingsResult.getStatus();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        //Log.i(TAG, "All location settings are satisfied.");
+        Log.i(TAG, "startLocationUpdates()");
 
-                        try {
-                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MainActivity.this);
-                        } catch (SecurityException e) {
-                            //Show Information about why you need the permission
-                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                            builder.setTitle(R.string.need_multiple_permissions);
-                            builder.setMessage(R.string.this_app_needs_location_permission);
-                            builder.setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                    ActivityCompat.requestPermissions(MainActivity.this, permissionsRequired, PERMISSION_REQUEST_CODE_CALLBACK);
-                                }
-                            });
-                            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.show();
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        //Log.i(TAG, "Location settings are not satisfied. Attempting to upgrade location settings ");
-                        try {
-                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException e) {
-                            //Log.i(TAG, "PendingIntent unable to execute request.");
-                        }
-                        break;
-                }
-                //updateUI();
+        if (!mSharedPref.getBoolean(PREF_KEY_USE_GPS, true)) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
-        });
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        } else {
+            LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequest).setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                @Override
+                public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
+                    final Status status = locationSettingsResult.getStatus();
+                    switch (status.getStatusCode()) {
+                        case LocationSettingsStatusCodes.SUCCESS:
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            //Log.i(TAG, "All location settings are satisfied.");
+
+                            try {
+                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MainActivity.this);
+                            } catch (SecurityException e) {
+                                //Show Information about why you need the permission
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                builder.setTitle(R.string.need_multiple_permissions);
+                                builder.setMessage(R.string.this_app_needs_location_permission);
+                                builder.setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                        ActivityCompat.requestPermissions(MainActivity.this, permissionsRequired, PERMISSION_REQUEST_CODE_CALLBACK);
+                                    }
+                                });
+                                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+                                builder.show();
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            //Log.i(TAG, "Location settings are not satisfied. Attempting to upgrade location settings ");
+                            try {
+                                status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                            } catch (IntentSender.SendIntentException e) {
+                                //Log.i(TAG, "PendingIntent unable to execute request.");
+                            }
+                            break;
+                    }
+                    //updateUI();
+                }
+            });
+        }
     }
 
     protected void stopLocationUpdates() {
@@ -585,7 +593,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             buildGoogleApiClient();
         }
-        startLocationUpdates();
+        //startLocationUpdates();
     }
 
     @Override
@@ -605,8 +613,22 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle connectionHint) {
         if (mCurrentLocation == null) {
+            //Log.i(TAG, "mCurrentLocation == null");
             try {
                 mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+                if(mCurrentLocation != null) {
+                    mLastLocationLatitude = mCurrentLocation.getLatitude();
+                    mLastLocationLongitude = mCurrentLocation.getLongitude();
+                } else {
+                    alertUserAboutNoLocation();
+                }
+
+                if (mRequestingLocationUpdates) {
+                    //Log.i(TAG, "in onConnected(), starting location updates");
+                    startLocationUpdates();
+                }
+
             } catch (SecurityException e) {
                 //Show Information about why you need the permission
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -628,15 +650,6 @@ public class MainActivity extends AppCompatActivity
                 builder.show();
             }
         }
-        if (mRequestingLocationUpdates) {
-            //Log.i(TAG, "in onConnected(), starting location updates");
-            startLocationUpdates();
-        }
-        if (mCurrentLocation != null) {
-            mLastLocationLatitude = mCurrentLocation.getLatitude();
-            mLastLocationLongitude = mCurrentLocation.getLongitude();
-        }
-        //getDelayedForecast();
     }
 
     @Override
@@ -760,8 +773,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_options_menu, menu);
 
-        SharedPreferences mSharedPref = this.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
-        menu.findItem(R.id.use_gps).setChecked(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false));
+        menu.findItem(R.id.use_gps).setChecked(mSharedPref.getBoolean(PREF_KEY_USE_GPS, true));
         return true;
     }
 
@@ -787,18 +799,15 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             case R.id.use_gps:
-                SharedPreferences mSharedPref = this.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = mSharedPref.edit();
-                if(item.isChecked()) {
+                if (item.isChecked()) {
                     // no GPS
                     editor.putBoolean(PREF_KEY_USE_GPS, false);
                     item.setChecked(false);
-                    mLocationRequestPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
                 } else {
                     // with GPS
                     editor.putBoolean(PREF_KEY_USE_GPS, true);
                     item.setChecked(true);
-                    mLocationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
                 }
                 editor.apply();
                 Handler handler = new Handler();
@@ -912,6 +921,30 @@ public class MainActivity extends AppCompatActivity
         mySnackbar.show();
     }
 
+    public void alertUserAboutNoLocation() {
+        if (mSwipeRefreshLayout.isRefreshing()) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.no_location_detected)
+                .setMessage(R.string.location_enabled)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent viewIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(viewIntent);
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            public void run() {
+                                System.exit(0);
+                            }
+                        }, 200);
+
+                    }
+                })
+                .show();
+    }
+
     private void updateDisplay() {
 
         Current current = mForecast.getCurrent();
@@ -925,7 +958,7 @@ public class MainActivity extends AppCompatActivity
 
         boolean withPhoto = mSharedPreferences.getBoolean("photo_background_switch", true);
         int background = R.drawable.bg_gradient;
-        if(mAppTheme.equals("1")) {
+        if (mAppTheme.equals("1")) {
             background = R.drawable.bg_gradient_orange;
         }
 
@@ -1006,7 +1039,7 @@ public class MainActivity extends AppCompatActivity
     private void toggleTextBackgroundDrawable(boolean transparent) {
 
         int backGroundDrawable = R.drawable.bg_text_transparent;
-        if(!transparent) {
+        if (!transparent) {
             // Background drawable is visible
             backGroundDrawable = R.drawable.bg_text_pointed_corners;
             mSummaryLabel.setBackgroundResource(R.drawable.bg_text_round_corners);

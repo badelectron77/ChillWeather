@@ -1,6 +1,7 @@
 package de.joesch_it.chillweather.receiver;
 
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.app.job.JobInfo;
@@ -11,6 +12,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -77,7 +80,6 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_WIDGET_REFRESH_TIME;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
-import static de.joesch_it.chillweather.helper.App.PREF_KEY_USE_GPS;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
 
 public class BigChillWidgetProvider extends AppWidgetProvider
@@ -98,7 +100,6 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     private double mLastLocationLongitude = DEFAULT_LOCATION_LONGITUDE;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private int mLocationRequestPriority;
     //</editor-fold>
 
     //<editor-fold desc="AppWidgetProvider">
@@ -543,19 +544,10 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     //<editor-fold desc="Location">
     private void startLocationStuff() {
 
-        if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
-            // use GPS
-            mLocationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
-        } else {
-            // no GPS
-            mLocationRequestPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
-        }
-
         mRequestingLocationUpdates = true;
         if (playServicesAvailable()) {
             buildGoogleApiClient();
             createLocationRequest();
-            buildLocationSettingsRequest();
         }
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
@@ -584,28 +576,16 @@ public class BigChillWidgetProvider extends AppWidgetProvider
             mLocationRequest = new LocationRequest();
             mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLIS);
             mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLIS);
-            mLocationRequest.setPriority(mLocationRequestPriority);
+            mLocationRequest.setPriority(Helper.getLocationRequestPriority());
             mLocationRequest.setSmallestDisplacement(DISPLACEMENT_IN_METERS);
         }
     }
 
     protected void startLocationUpdates() {
-        LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequest).setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
-                final Status status = locationSettingsResult.getStatus();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        try {
-                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, BigChillWidgetProvider.this);
-                        } catch (SecurityException e) {
-                            //
-                        }
-                        break;
-                }
-            }
-        });
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     protected void stopLocationUpdates() {
@@ -620,12 +600,6 @@ public class BigChillWidgetProvider extends AppWidgetProvider
                 }
             });
         }
-    }
-
-    protected void buildLocationSettingsRequest() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        mLocationSettingsRequest = builder.build();
     }
 
     @Override

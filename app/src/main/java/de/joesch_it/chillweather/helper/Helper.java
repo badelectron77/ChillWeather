@@ -17,6 +17,8 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 
+import com.google.android.gms.location.LocationRequest;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -29,6 +31,7 @@ import de.joesch_it.chillweather.receiver.ChillWidgetProvider;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_VALUES;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_USE_GPS;
 
 public final class Helper {
 
@@ -44,6 +47,19 @@ public final class Helper {
         locationName = locationName.replaceAll("\\w*\\d\\w*", "");
 
         return locationName.trim();
+    }
+
+    public static int getLocationRequestPriority() {
+        SharedPreferences mSharedPref = App.getContext().getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
+        int locationRequestPriority;
+        if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, true)) {
+            // use GPS
+            locationRequestPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+        } else {
+            // no GPS
+            locationRequestPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+        }
+        return locationRequestPriority;
     }
 
     public static void updateSmallWidget(Context context) {
