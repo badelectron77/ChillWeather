@@ -276,7 +276,8 @@ public class MainActivity extends AppCompatActivity
 
         scrollToTop();
 
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && playServicesAvailable() && mRequestingLocationUpdates) {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && playServicesAvailable()) {
+            //Log.i(TAG, "inside");
             startLocationUpdates();
         }
 
@@ -615,48 +616,53 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle connectionHint) {
         if (mCurrentLocation == null) {
-            //Log.i(TAG, "mCurrentLocation == null");
-            try {
-                mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            getLastKnownLocation();
+        }
+    }
 
-                if(mCurrentLocation != null) {
-                    mLastLocationLatitude = mCurrentLocation.getLatitude();
-                    mLastLocationLongitude = mCurrentLocation.getLongitude();
-                } else {
-                    alertUserAboutNoLocation();
-                }
+    private void getLastKnownLocation() {
+        try {
+            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-                if (mRequestingLocationUpdates) {
-                    //Log.i(TAG, "in onConnected(), starting location updates");
-                    startLocationUpdates();
-                }
-
-            } catch (SecurityException e) {
-                //Show Information about why you need the permission
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle(getString(R.string.need_multiple_permissions));
-                builder.setMessage(getString(R.string.this_app_needs_location_permission));
-                builder.setPositiveButton(getString(R.string.grant), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        ActivityCompat.requestPermissions(MainActivity.this, permissionsRequired, PERMISSION_REQUEST_CODE_CALLBACK);
-                    }
-                });
-                builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
+            if(mCurrentLocation != null) {
+                mLastLocationLatitude = mCurrentLocation.getLatitude();
+                mLastLocationLongitude = mCurrentLocation.getLongitude();
+                //Log.i(TAG, String.valueOf(mLastLocationLongitude));
+                //Log.i(TAG, String.valueOf(mLastLocationLatitude));
+            } else {
+                alertUserAboutNoLocation();
             }
+
+            if (mRequestingLocationUpdates) {
+                //Log.i(TAG, "in onConnected(), starting location updates");
+                startLocationUpdates();
+            }
+
+        } catch (SecurityException e) {
+            //Show Information about why you need the permission
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle(getString(R.string.need_multiple_permissions));
+            builder.setMessage(getString(R.string.this_app_needs_location_permission));
+            builder.setPositiveButton(getString(R.string.grant), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                    ActivityCompat.requestPermissions(MainActivity.this, permissionsRequired, PERMISSION_REQUEST_CODE_CALLBACK);
+                }
+            });
+            builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            builder.show();
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        //Toast.makeText(this, "onLocationChanged()", Toast.LENGTH_SHORT).show();
+        //Log.v(TAG, "onLocationChanged()");
 
         mCurrentLocation = location;
 
