@@ -20,7 +20,7 @@ import static de.joesch_it.chillweather.helper.Helper.updateSmallWidget;
 
 public class App extends Application {
 
-    public static final String BUILD = "04.08.2017 19:33";
+    public static final String BUILD = "04.08.2017 23:56";
     public static final String STORE_URL = "https://play.google.com/store/apps/details?id=de.joesch_it.chillweather";
     public static final String TAG = " ### " + App.class.getSimpleName() + " ###";
     public static final String POSITION_TOMORROW = "POSITION_TOMORROW";
@@ -32,6 +32,8 @@ public class App extends Application {
     public static final String PREF_KEY_AUTOREFRESH_FREQUENCY = "PREF_KEY_AUTOREFRESH_FREQUENCY";
     public static final String PREF_KEY_APP_THEME = "PREF_KEY_APP_THEME";
     public static final String PREF_KEY_USE_GPS = "PREF_KEY_USE_GPS";
+    public static final String PREF_KEY_FOUND_LAT = "PREF_KEY_FOUND_LAT";
+    public static final String PREF_KEY_FOUND_LNG = "PREF_KEY_FOUND_LNG";
 
     // small widget
     public static final String PREF_KEY_WIDGET_TRANSPARENCY = "PREF_KEY_WIDGET_TRANSPARENCY";
@@ -60,8 +62,8 @@ public class App extends Application {
     public static final long FORECAST_DELAY_IN_MILLIS_WIDGETS = 4000;
     public static final long UPDATE_INTERVAL_IN_MILLIS = 10000; // The desired interval for location updates. Inexact.
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLIS = UPDATE_INTERVAL_IN_MILLIS / 2;
-    public static final double DEFAULT_LOCATION_LATITUDE = 50.435429; // somewhere in the Eifel...
-    public static final double DEFAULT_LOCATION_LONGITUDE = 6.973161;
+    public static final double DEFAULT_LOCATION_LATITUDE = -65.487125; // in the middle of nowhere...
+    public static final double DEFAULT_LOCATION_LONGITUDE = -152.912444;
     public static final int PERMISSION_REQUEST_CODE_CALLBACK = 100;
     public static final int PERMISSION_REQUEST_CODE_SETTING = 101;
     public static String[] permissionsRequired = new String[] {Manifest.permission.ACCESS_FINE_LOCATION,

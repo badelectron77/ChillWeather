@@ -81,6 +81,8 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_KEEP_VALUES;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_SHOW_LOADING;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_BIG_WIDGET_REFRESH_TIME;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_FOUND_LAT;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_FOUND_LNG;
 import static de.joesch_it.chillweather.helper.App.UPDATE_INTERVAL_IN_MILLIS;
 
 public class BigChillWidgetProvider extends AppWidgetProvider
@@ -392,6 +394,19 @@ public class BigChillWidgetProvider extends AppWidgetProvider
     private void getForecast(final AppWidgetManager appWidgetManager, final RemoteViews updateViews, final int appWidgetId) {
         //Log.v(TAG, "getForecast() in groß");
 
+        double savedLat = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LAT, 0);
+        double savedLng = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LNG, 0);
+
+        if(mLastLocationLatitude == DEFAULT_LOCATION_LATITUDE
+                && mLastLocationLongitude == DEFAULT_LOCATION_LONGITUDE /* no location found */
+                && savedLat != 0 && savedLng != 0 /* saved values exist */
+                ) {
+            //Log.v(TAG, savedLat + " " + savedLng);
+
+            mLastLocationLatitude = savedLat;
+            mLastLocationLongitude = savedLng;
+        }
+
         String DARKSKY_API_KEY = mContext.getString(R.string.darksky_api_key);
 
         final String locale = Locale.getDefault().getLanguage();
@@ -633,6 +648,12 @@ public class BigChillWidgetProvider extends AppWidgetProvider
 
         mLastLocationLatitude = mCurrentLocation.getLatitude();
         mLastLocationLongitude = mCurrentLocation.getLongitude();
+
+        // save last found location
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putFloat(PREF_KEY_FOUND_LAT, (float) mLastLocationLatitude);
+        editor.putFloat(PREF_KEY_FOUND_LNG, (float) mLastLocationLongitude);
+        editor.apply();
     }
     //</editor-fold>
 }

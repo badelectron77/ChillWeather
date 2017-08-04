@@ -102,6 +102,8 @@ import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_FREQUENC
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_SWITCH;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_COLORED_ICONS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_FOUND_LAT;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_FOUND_LNG;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_USE_GPS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_WIDGET_TRANSPARENCY;
 import static de.joesch_it.chillweather.helper.App.STORE_URL;
@@ -337,6 +339,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void getForecast() {
+
+        double savedLat = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LAT, 0);
+        double savedLng = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LNG, 0);
+
+        if(mLastLocationLatitude == DEFAULT_LOCATION_LATITUDE
+                && mLastLocationLongitude == DEFAULT_LOCATION_LONGITUDE /* no location found */
+                && savedLat != 0 && savedLng != 0 /* saved values exist */
+                ) {
+            //Log.v(TAG, savedLat + " " + savedLng);
+
+            mLastLocationLatitude = savedLat;
+            mLastLocationLongitude = savedLng;
+        }
 
         final String locale = Locale.getDefault().getLanguage();
 
@@ -668,6 +683,12 @@ public class MainActivity extends AppCompatActivity
 
         mLastLocationLatitude = mCurrentLocation.getLatitude();
         mLastLocationLongitude = mCurrentLocation.getLongitude();
+
+        // save last found location
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putFloat(PREF_KEY_FOUND_LAT, (float) mLastLocationLatitude);
+        editor.putFloat(PREF_KEY_FOUND_LNG, (float) mLastLocationLongitude);
+        editor.apply();
     }
 
     @Override

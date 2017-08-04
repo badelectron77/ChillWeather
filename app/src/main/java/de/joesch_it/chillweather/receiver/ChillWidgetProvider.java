@@ -66,6 +66,8 @@ import static de.joesch_it.chillweather.helper.App.DISPLACEMENT_IN_METERS;
 import static de.joesch_it.chillweather.helper.App.FASTEST_UPDATE_INTERVAL_IN_MILLIS;
 import static de.joesch_it.chillweather.helper.App.FORECAST_DELAY_IN_MILLIS_WIDGETS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_FOUND_LAT;
+import static de.joesch_it.chillweather.helper.App.PREF_KEY_FOUND_LNG;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_ICON;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_LOCATION;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_TEMPERATURE;
@@ -291,6 +293,19 @@ public class ChillWidgetProvider extends AppWidgetProvider
     //<editor-fold desc="getForecast">
     private void getForecast(final AppWidgetManager appWidgetManager, final RemoteViews updateViews, final int appWidgetId) {
         //Log.v(TAG, "getForecast() in klein");
+
+        double savedLat = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LAT, 0);
+        double savedLng = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LNG, 0);
+
+        if(mLastLocationLatitude == DEFAULT_LOCATION_LATITUDE
+                && mLastLocationLongitude == DEFAULT_LOCATION_LONGITUDE /* no location found */
+                && savedLat != 0 && savedLng != 0 /* saved values exist */
+                ) {
+            //Log.v(TAG, savedLat + " " + savedLng);
+
+            mLastLocationLatitude = savedLat;
+            mLastLocationLongitude = savedLng;
+        }
 
         String DARKSKY_API_KEY = mContext.getString(R.string.darksky_api_key);
 
@@ -533,6 +548,12 @@ public class ChillWidgetProvider extends AppWidgetProvider
 
         mLastLocationLatitude = mCurrentLocation.getLatitude();
         mLastLocationLongitude = mCurrentLocation.getLongitude();
+
+        // save last found location
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putFloat(PREF_KEY_FOUND_LAT, (float) mLastLocationLatitude);
+        editor.putFloat(PREF_KEY_FOUND_LNG, (float) mLastLocationLongitude);
+        editor.apply();
     }
     //</editor-fold>
 }
