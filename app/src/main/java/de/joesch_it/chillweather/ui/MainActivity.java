@@ -95,6 +95,7 @@ import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
 import static de.joesch_it.chillweather.helper.App.DISPLACEMENT_IN_METERS;
 import static de.joesch_it.chillweather.helper.App.FASTEST_UPDATE_INTERVAL_IN_MILLIS;
+import static de.joesch_it.chillweather.helper.App.FORECAST_DELAY_IN_MILLIS_MAIN_ACTIVITY;
 import static de.joesch_it.chillweather.helper.App.HOURLY_FORECAST;
 import static de.joesch_it.chillweather.helper.App.PERMISSION_REQUEST_CODE_CALLBACK;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_AUTOREFRESH_FREQUENCY;
@@ -119,7 +120,6 @@ public class MainActivity extends AppCompatActivity
     protected final static String KEY_LOCATION = "KEY_LOCATION";
     protected static final int REQUEST_CHECK_SETTINGS = 0x1; // Constant used in the location settings dialog.
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
-    private static final int FORECAST_MAX_DELAY_IN_MILLIS = 1500;
     static public Hour[] mHourlyForecast;
     protected Boolean mRequestingLocationUpdates;
     protected Location mCurrentLocation;
@@ -332,7 +332,7 @@ public class MainActivity extends AppCompatActivity
             public void run() {
                 getForecast();
             }
-        }, FORECAST_MAX_DELAY_IN_MILLIS);
+        }, FORECAST_DELAY_IN_MILLIS_MAIN_ACTIVITY);
     }
 
     private void getForecast() {

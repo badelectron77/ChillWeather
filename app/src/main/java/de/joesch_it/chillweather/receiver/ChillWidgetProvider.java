@@ -64,6 +64,7 @@ import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LATITUDE;
 import static de.joesch_it.chillweather.helper.App.DEFAULT_LOCATION_LONGITUDE;
 import static de.joesch_it.chillweather.helper.App.DISPLACEMENT_IN_METERS;
 import static de.joesch_it.chillweather.helper.App.FASTEST_UPDATE_INTERVAL_IN_MILLIS;
+import static de.joesch_it.chillweather.helper.App.FORECAST_DELAY_IN_MILLIS_WIDGETS;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_FILE;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_ICON;
 import static de.joesch_it.chillweather.helper.App.PREF_KEY_KEEP_LOCATION;
@@ -78,11 +79,9 @@ public class ChillWidgetProvider extends AppWidgetProvider
 
     //<editor-fold desc="Fields">
     public static final String TAG = " ### " + ChillWidgetProvider.class.getSimpleName() + " ###";
-    private static final int FORECAST_MAX_DELAY_IN_MILLIS = 3000;
     private final Context mContext = App.getContext();
     protected Boolean mRequestingLocationUpdates;
     protected Location mCurrentLocation;
-    protected LocationSettingsRequest mLocationSettingsRequest;
     protected SharedPreferences mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
     private SharedPreferences mSharedPref = mContext.getSharedPreferences(PREF_KEY_FILE, Context.MODE_PRIVATE);
     private double mLastLocationLatitude = DEFAULT_LOCATION_LATITUDE;
@@ -234,7 +233,7 @@ public class ChillWidgetProvider extends AppWidgetProvider
                     getForecast(appWidgetManager, updateViews, appWidgetId);
                     stopLocationUpdates();
                 }
-            }, FORECAST_MAX_DELAY_IN_MILLIS);
+            }, FORECAST_DELAY_IN_MILLIS_WIDGETS);
         }
 
         if (keepValues) {
