@@ -1,7 +1,6 @@
 package de.joesch_it.chillweather.ui;
 
 
-import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.StateListAnimator;
 import android.app.Activity;
@@ -12,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -22,7 +20,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -38,7 +35,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -77,10 +73,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.joesch_it.chillweather.R;
 import de.joesch_it.chillweather.helper.Helper;
-import de.joesch_it.chillweather.weather.data.Forecast;
 import de.joesch_it.chillweather.weather.adapters.DayAdapter;
 import de.joesch_it.chillweather.weather.data.Current;
 import de.joesch_it.chillweather.weather.data.Day;
+import de.joesch_it.chillweather.weather.data.Forecast;
 import de.joesch_it.chillweather.weather.data.Hour;
 import de.joesch_it.chillweather.weather.deserializer.CurrentDeserializer;
 import de.joesch_it.chillweather.weather.deserializer.DayDeserializer;
@@ -227,9 +223,7 @@ public class MainActivity extends AppCompatActivity
         if (playServicesAvailable()) {
             buildGoogleApiClient();
             createLocationRequest();
-            if(mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
-                buildLocationSettingsRequest();
-            }
+            buildLocationSettingsRequest();
         }
         mAdapter = new DayAdapter(mDayList);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -343,7 +337,7 @@ public class MainActivity extends AppCompatActivity
         double savedLat = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LAT, 0);
         double savedLng = (double) mSharedPref.getFloat(PREF_KEY_FOUND_LNG, 0);
 
-        if(mLastLocationLatitude == DEFAULT_LOCATION_LATITUDE
+        if (mLastLocationLatitude == DEFAULT_LOCATION_LATITUDE
                 && mLastLocationLongitude == DEFAULT_LOCATION_LONGITUDE /* no location found */
                 && savedLat != 0 && savedLng != 0 /* saved values exist */
                 ) {
@@ -536,57 +530,50 @@ public class MainActivity extends AppCompatActivity
     protected void startLocationUpdates() {
         //Log.i(TAG, "startLocationUpdates()");
 
-        if (!mSharedPref.getBoolean(PREF_KEY_USE_GPS, false)) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        } else {
-            LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequest).setResultCallback(new ResultCallback<LocationSettingsResult>() {
-                @Override
-                public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
-                    final Status status = locationSettingsResult.getStatus();
-                    switch (status.getStatusCode()) {
-                        case LocationSettingsStatusCodes.SUCCESS:
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            //Log.i(TAG, "All location settings are satisfied.");
+        LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequest).setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
+                final Status status = locationSettingsResult.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        //Log.i(TAG, "All location settings are satisfied.");
 
-                            try {
-                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MainActivity.this);
-                            } catch (SecurityException e) {
-                                //Show Information about why you need the permission
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                                builder.setTitle(R.string.need_multiple_permissions);
-                                builder.setMessage(R.string.this_app_needs_location_permission);
-                                builder.setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.cancel();
-                                        ActivityCompat.requestPermissions(MainActivity.this, permissionsRequired, PERMISSION_REQUEST_CODE_CALLBACK);
-                                    }
-                                });
-                                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.cancel();
-                                    }
-                                });
-                                builder.show();
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            //Log.i(TAG, "Location settings are not satisfied. Attempting to upgrade location settings ");
-                            try {
-                                status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
-                            } catch (IntentSender.SendIntentException e) {
-                                //Log.i(TAG, "PendingIntent unable to execute request.");
-                            }
-                            break;
-                    }
-                    //updateUI();
+                        try {
+                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, MainActivity.this);
+                        } catch (SecurityException e) {
+                            //Show Information about why you need the permission
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle(R.string.need_multiple_permissions);
+                            builder.setMessage(R.string.this_app_needs_location_permission);
+                            builder.setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                    ActivityCompat.requestPermissions(MainActivity.this, permissionsRequired, PERMISSION_REQUEST_CODE_CALLBACK);
+                                }
+                            });
+                            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            });
+                            builder.show();
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        //Log.i(TAG, "Location settings are not satisfied. Attempting to upgrade location settings ");
+                        try {
+                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            //Log.i(TAG, "PendingIntent unable to execute request.");
+                        }
+                        break;
                 }
-            });
-        }
+                //updateUI();
+            }
+        });
     }
 
     protected void stopLocationUpdates() {
@@ -639,13 +626,11 @@ public class MainActivity extends AppCompatActivity
         try {
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-            if(mCurrentLocation != null) {
+            if (mCurrentLocation != null) {
                 mLastLocationLatitude = mCurrentLocation.getLatitude();
                 mLastLocationLongitude = mCurrentLocation.getLongitude();
                 //Log.i(TAG, String.valueOf(mLastLocationLongitude));
                 //Log.i(TAG, String.valueOf(mLastLocationLatitude));
-            } else {
-                alertUserAboutNoLocation();
             }
 
             if (mRequestingLocationUpdates) {
@@ -865,7 +850,7 @@ public class MainActivity extends AppCompatActivity
             public void run() {
                 Intent mStartActivity = new Intent(getApplicationContext(), MainActivity.class);
                 int mPendingIntentId = 123456;
-                PendingIntent mPendingIntent = PendingIntent.getActivity(getApplicationContext(), mPendingIntentId,    mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent mPendingIntent = PendingIntent.getActivity(getApplicationContext(), mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
                 AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                 mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
                 System.exit(0);
@@ -957,30 +942,6 @@ public class MainActivity extends AppCompatActivity
         }
         Snackbar mySnackbar = Snackbar.make(mNestedScrollView, R.string.network_is_unavailable, Snackbar.LENGTH_LONG);
         mySnackbar.show();
-    }
-
-    public void alertUserAboutNoLocation() {
-        if (mSwipeRefreshLayout.isRefreshing()) {
-            mSwipeRefreshLayout.setRefreshing(false);
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.no_location_detected)
-                .setMessage(R.string.location_enabled)
-                .setPositiveButton(R.string.location_settings, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent viewIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(viewIntent);
-                        Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            public void run() {
-                                System.exit(0);
-                            }
-                        }, 200);
-
-                    }
-                })
-                .show();
     }
 
     private void updateDisplay() {

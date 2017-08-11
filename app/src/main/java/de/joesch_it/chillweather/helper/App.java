@@ -20,7 +20,7 @@ import static de.joesch_it.chillweather.helper.Helper.updateSmallWidget;
 
 public class App extends Application {
 
-    public static final String BUILD = "04.08.2017 23:56";
+    public static final String BUILD = "11.08.2017 13:56";
     public static final String STORE_URL = "https://play.google.com/store/apps/details?id=de.joesch_it.chillweather";
     public static final String TAG = " ### " + App.class.getSimpleName() + " ###";
     public static final String POSITION_TOMORROW = "POSITION_TOMORROW";
@@ -58,8 +58,8 @@ public class App extends Application {
 
     public static final String BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
     public static final int DISPLACEMENT_IN_METERS = 100;
-    public static final long FORECAST_DELAY_IN_MILLIS_MAIN_ACTIVITY = 2000;
-    public static final long FORECAST_DELAY_IN_MILLIS_WIDGETS = 4000;
+    public static final long FORECAST_DELAY_IN_MILLIS_MAIN_ACTIVITY = 1500;
+    public static final long FORECAST_DELAY_IN_MILLIS_WIDGETS = 1500;
     public static final long UPDATE_INTERVAL_IN_MILLIS = 10000; // The desired interval for location updates. Inexact.
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLIS = UPDATE_INTERVAL_IN_MILLIS / 2;
     public static final double DEFAULT_LOCATION_LATITUDE = -65.487125; // in the middle of nowhere...

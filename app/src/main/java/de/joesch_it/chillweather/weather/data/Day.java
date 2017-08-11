@@ -23,7 +23,8 @@ public class Day {
     }
 
     public String getSummary() {
-        return mSummary;
+        // remove ending point (http://regexr.com/)
+        return mSummary.replaceAll("\\.$", "");
     }
 
     public void setSummary(String summary) {
